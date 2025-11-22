@@ -19,7 +19,7 @@ This project provides a simple interface for:
 - Single-page UI (index.html) with intuitive form inputs  
 - JavaScript logic for attendance tracking (app.js)  
 - CSS styling for clean and consistent look (styles.css)  
-- Local storage or minimal backend support (if implemented)  
+- Local storage or minimal backend support  
 - Input validation (employee ID, date, time)  
 - Export or print-friendly view of attendance summary
 
