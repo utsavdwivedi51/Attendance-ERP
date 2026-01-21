@@ -363,3 +363,89 @@ tbody tr:hover td{
   .stats{ grid-template-columns: repeat(2, minmax(0,1fr)) }
   header .row{ flex-wrap:wrap }
 }
+/* Bad text for overdue/negative amounts */
+.bad { color: #ef4444 !important; font-weight: 600; }
+
+/* Fee status colors */
+.chip.partial { 
+  background: #fef3c7; 
+  color:#92400e; 
+  border:1px solid #fcd34d;
+}
+
+.chip.overdue { 
+  background: #fee2e2; 
+  color:#b91c1c; 
+  border:1px solid #fca5a5;
+}
+
+.chip.paid { 
+  background: #d1fae5; 
+  color:#047857; 
+  border:1px solid #6ee7b7;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Receipt styling */
+.receipt {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.receipt-header {
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.receipt-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.receipt-amount {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 12px;
+  border: 1px solid #86efac;
+}
+
+/* Print styles for receipts */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt, .receipt * {
+    visibility: visible;
+  }
+  .receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
