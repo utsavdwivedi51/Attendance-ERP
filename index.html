@@ -66,12 +66,12 @@
           </div>
           <div class="field">
             <label>Email / ID</label>
-            <input class="input" id="loginId" placeholder="Enter Jitendra Kumar" />
+            <input class="input" id="loginId" placeholder="Jitendra Kumar" />
           </div>
           <div class="field">
             <label>Password</label>
             <div class="row" style="width:100%">
-              <input class="input" id="loginPass" type="password" placeholder="Enter teacher123" style="flex:1" />
+              <input class="input" id="loginPass" type="password" placeholder="teacher123" style="flex:1" />
               <button class="btn small" id="togglePass" type="button">Show</button>
             </div>
             <small style="color:var(--muted)"> <code></code>  <code></code></small>
@@ -311,33 +311,38 @@
   </section>
 
   <!-- Scripts -->
-  <script src="app.js">
-
-// Get references to the elements
-const roleRadios = document.querySelectorAll('input[name="role"]');
-const loginIdInput = document.getElementById('loginId');
-const loginPassInput = document.getElementById('loginPass');
-
-// Function to update placeholders based on selected role
-function updatePlaceholders() {
-  const selectedRole = document.querySelector('input[name="role"]:checked').value;
+  <script src="app.js"></script>
   
-  if (selectedRole === 'teacher') {
-    loginIdInput.placeholder = 'Jitendra Kumar';
-    loginPassInput.placeholder = 'teacher123';
-  } else if (selectedRole === 'student') {
-    loginIdInput.placeholder = 'mrmalviyaji@gmail.com';
-    loginPassInput.placeholder = 'om@123';
-  }
-}
+  <!-- Dynamic Placeholder Script -->
+  <script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get references to the elements
+      const roleRadios = document.querySelectorAll('input[name="role"]');
+      const loginIdInput = document.getElementById('loginId');
+      const loginPassInput = document.getElementById('loginPass');
 
-// Add event listeners to both radio buttons
-roleRadios.forEach(radio => {
-  radio.addEventListener('change', updatePlaceholders);
-});
+      // Function to update placeholders based on selected role
+      function updatePlaceholders() {
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+        
+        if (selectedRole === 'teacher') {
+          loginIdInput.placeholder = 'Jitendra Kumar';
+          loginPassInput.placeholder = 'teacher123';
+        } else if (selectedRole === 'student') {
+          loginIdInput.placeholder = 'mrmalviyaji@gmail.com';
+          loginPassInput.placeholder = 'om@123';
+        }
+      }
 
-// Set initial placeholders on page load
-updatePlaceholders();
+      // Add event listeners to both radio buttons
+      roleRadios.forEach(radio => {
+        radio.addEventListener('change', updatePlaceholders);
+      });
+
+      // Set initial placeholders on page load
+      updatePlaceholders();
+    });
   </script>
 </body>
 </html>
