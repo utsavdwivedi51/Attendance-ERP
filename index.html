@@ -311,6 +311,33 @@
   </section>
 
   <!-- Scripts -->
-  <script src="app.js"></script>
+  <script src="app.js">
+
+// Get references to the elements
+const roleRadios = document.querySelectorAll('input[name="role"]');
+const loginIdInput = document.getElementById('loginId');
+const loginPassInput = document.getElementById('loginPass');
+
+// Function to update placeholders based on selected role
+function updatePlaceholders() {
+  const selectedRole = document.querySelector('input[name="role"]:checked').value;
+  
+  if (selectedRole === 'teacher') {
+    loginIdInput.placeholder = 'Jitendra Kumar';
+    loginPassInput.placeholder = 'teacher123';
+  } else if (selectedRole === 'student') {
+    loginIdInput.placeholder = 'mrmalviyaji@gmail.com';
+    loginPassInput.placeholder = 'om@123';
+  }
+}
+
+// Add event listeners to both radio buttons
+roleRadios.forEach(radio => {
+  radio.addEventListener('change', updatePlaceholders);
+});
+
+// Set initial placeholders on page load
+updatePlaceholders();
+  </script>
 </body>
 </html>
