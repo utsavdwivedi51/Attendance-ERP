@@ -37,7 +37,7 @@ function seedDemo(){
 
   // Students
   const students = [
-    { id:'176', name:'Utsav Dwivedi', roll:'2204280100176', class:'CS-7A', email:'utsavdwivedi51@gmail.com', password:'utsav@123' },
+    { id:'176', name:'Om Malviya', roll:'2204280100176', class:'CS-7A', email:'mrmalviyaji@gmail.com', password:'om@123' },
     { id:'169', name:'Shristi Tripathi', roll:'2204280100169', class:'CS-7A', email:'shristi66@gmail.com', password:'shristi@123' },
     { id:'150', name:'Raj Dwivedi', roll:'2204280100150', class:'CS-7B', email:'rajdwivedi@gmail.com', password:'raj@123' },
     { id:'054', name:'Akshay Yadav', roll:'2204280100054', class:'CS-7B', email:'akshay12@gmail.com', password:'akshay@123' }
