@@ -263,6 +263,124 @@
         </div>
       </div>
 
+            <!-- FEE MONITORING (Teacher) -->
+      <div id="feeMonitoring" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Fee Monitoring</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Manage student fees, record payments, and generate reports.</p>
+          </div>
+          <div class="row">
+            <button class="btn" id="addFeeRecordBtn">Add Fee Record</button>
+            <button class="btn primary" id="generateFeeReportBtn">Generate Report</button>
+          </div>
+        </div>
+
+        <!-- Add Fee Record Modal -->
+        <div id="addFeeModal" class="card hide" style="margin-top:16px; padding:20px">
+          <div class="row" style="justify-content:space-between; align-items:center">
+            <h3 style="margin:0">Add Fee Record</h3>
+            <button class="btn ghost" id="closeFeeModal">✕</button>
+          </div>
+          <div class="grid cols-2" style="margin-top:12px; gap:12px">
+            <div class="field">
+              <label>Student</label>
+              <select class="input" id="feeStudentSelect">
+                <option value="">Select Student</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Fee Type</label>
+              <select class="input" id="feeType">
+                <option value="Tuition">Tuition Fee</option>
+                <option value="Library">Library Fee</option>
+                <option value="Lab">Lab Fee</option>
+                <option value="Exam">Exam Fee</option>
+                <option value="Hostel">Hostel Fee</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Amount (₹)</label>
+              <input class="input" id="feeAmount" type="number" placeholder="5000" />
+            </div>
+            <div class="field">
+              <label>Due Date</label>
+              <input class="input" id="feeDueDate" type="date" />
+            </div>
+            <div class="field">
+              <label>Academic Year</label>
+              <input class="input" id="feeAcademicYear" value="2024-25" />
+            </div>
+            <div class="field">
+              <label>Semester</label>
+              <select class="input" id="feeSemester">
+                <option value="Semester 1">Semester 1</option>
+                <option value="Semester 2">Semester 2</option>
+                <option value="Semester 3">Semester 3</option>
+                <option value="Semester 4">Semester 4</option>
+                <option value="Semester 5">Semester 5</option>
+                <option value="Semester 6">Semester 6</option>
+                <option value="Semester 7">Semester 7</option>
+                <option value="Semester 8">Semester 8</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select class="input" id="feeStatus">
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Partial">Partial Payment</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Paid Amount (₹)</label>
+              <input class="input" id="feePaidAmount" type="number" placeholder="0" />
+            </div>
+            <div class="field" style="grid-column: span 2">
+              <label>Notes (Optional)</label>
+              <textarea class="input" id="feeNotes" rows="2" placeholder="Additional notes..."></textarea>
+            </div>
+          </div>
+          <div class="row" style="margin-top:16px; justify-content:flex-end; gap:12px">
+            <button class="btn" id="cancelFeeBtn">Cancel</button>
+            <button class="btn success" id="saveFeeBtn">Save Fee Record</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <select class="input" id="feeClassFilter" style="max-width:220px">
+            <option value="">All Classes</option>
+          </select>
+          <select class="input" id="feeStatusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+            <option value="Partial">Partial</option>
+          </select>
+          <input class="input" id="feeSearch" placeholder="Search by student name/roll" />
+        </div>
+
+        <div class="card" style="padding:0; margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Fee Type</th>
+                <th>Total Amount</th>
+                <th>Paid</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="feeTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- STUDENT HOME -->
       <div id="studentHome" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
@@ -304,6 +422,79 @@
               </tr>
             </thead>
             <tbody id="stuTbody"></tbody>
+          </table>
+        </div>
+      </div>
+       <!-- STUDENT FEES (Student View) -->
+      <div id="studentFees" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">My Fee Status</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">View your fee details and payment history.</p>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="downloadFeeReceiptBtn">Download Receipt</button>
+          </div>
+        </div>
+
+        <div class="stats" style="margin-top:14px">
+          <div class="stat">
+            <div class="big" id="stuTotalFees">₹0</div>
+            <div>Total Fees</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuPaidFees">₹0</div>
+            <div>Paid Amount</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuDueFees">₹0</div>
+            <div>Due Amount</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuPendingCount">0</div>
+            <div>Pending Fees</div>
+          </div>
+        </div>
+
+        <div class="tabs" style="margin-top:20px">
+          <div class="tab active" data-tab="current">Current Fees</div>
+          <div class="tab" data-tab="history">Payment History</div>
+        </div>
+
+        <!-- Current Fees Table -->
+        <div id="currentFeesTable" class="card" style="padding:0; margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>Fee Type</th>
+                <th>Academic Year</th>
+                <th>Semester</th>
+                <th>Total Amount</th>
+                <th>Paid Amount</th>
+                <th>Due Amount</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="stuFeeTbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Payment History Table -->
+        <div id="paymentHistoryTable" class="card pad hide" style="margin-top:12px">
+          <h3 style="margin:0 0 12px 0">Payment History</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Fee Type</th>
+                <th>Amount Paid</th>
+                <th>Payment Mode</th>
+                <th>Receipt No</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="stuPaymentTbody"></tbody>
           </table>
         </div>
       </div>
