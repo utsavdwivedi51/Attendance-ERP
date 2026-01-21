@@ -16,8 +16,10 @@ const db = {
 const store = {
   users: 'sl_users',
   students: 'sl_students',
-  attendance: 'sl_attendance', // array of {date, studentId, status}
-}
+  attendance: 'sl_attendance',
+  fees: 'sl_fees',
+  payments: 'sl_payments'
+};
 
 function uid(prefix='U'){
   return prefix + Math.random().toString(36).slice(2,8).toUpperCase();
@@ -26,13 +28,18 @@ function uid(prefix='U'){
 function seeded(){ return db.get('sl_seeded', false) }
 function setSeeded(v){ db.set('sl_seeded', !!v) }
 
+function initFeeStores() {
+  if (!db.get(store.fees)) db.set(store.fees, []);
+  if (!db.get(store.payments)) db.set(store.payments, []);
+}
+
 function seedDemo(){
   // Teacher
   const users = [
-        { id: 'T001', role:'teacher', email:'Jitendra Kumar', password:'teacher123', name:'Admin Jitendra Kumar' },
-         { id: 'T002', role:'teacher', email:'Naman Jaiswal', password:'teacher123', name:'Admin Naman Jaiswal' },
-          { id: 'T003', role:'teacher', email:'Jyoti Srivastava', password:'teacher123', name:'Admin Jyoti Srivastava' },
-           { id: 'T004', role:'teacher', email:'Devendra Awasthi', password:'teacher123', name:'Admin Devendra Awasthi' }
+    { id: 'T001', role:'teacher', email:'Jitendra Kumar', password:'teacher123', name:'Admin Jitendra Kumar' },
+    { id: 'T002', role:'teacher', email:'Naman Jaiswal', password:'teacher123', name:'Admin Naman Jaiswal' },
+    { id: 'T003', role:'teacher', email:'Jyoti Srivastava', password:'teacher123', name:'Admin Jyoti Srivastava' },
+    { id: 'T004', role:'teacher', email:'Devendra Awasthi', password:'teacher123', name:'Admin Devendra Awasthi' }
   ];
 
   // Students
@@ -51,19 +58,122 @@ function seedDemo(){
     date.setDate(now.getDate()-d);
     const iso = date.toISOString().slice(0,10);
     for(const s of students){
-      // random-ish pattern
       const present = Math.random() > 0.15;
       attendance.push({date: iso, studentId: s.id, status: present ? 'P' : 'A'});
     }
   }
 
+  // Fees
+  const fees = [
+    {
+      id: 'F001',
+      studentId: '176',
+      studentName: 'Om Malviya',
+      rollNo: '2204280100176',
+      className: 'CS-7A',
+      feeType: 'Tuition',
+      amount: 15000,
+      paidAmount: 15000,
+      dueDate: '2024-12-31',
+      academicYear: '2024-25',
+      semester: 'Semester 7',
+      status: 'Paid',
+      notes: 'Paid via online banking'
+    },
+    {
+      id: 'F002',
+      studentId: '176',
+      studentName: 'Om Malviya',
+      rollNo: '2204280100176',
+      className: 'CS-7A',
+      feeType: 'Library',
+      amount: 2000,
+      paidAmount: 2000,
+      dueDate: '2024-12-31',
+      academicYear: '2024-25',
+      semester: 'Semester 7',
+      status: 'Paid'
+    },
+    {
+      id: 'F003',
+      studentId: '169',
+      studentName: 'Shristi Tripathi',
+      rollNo: '2204280100169',
+      className: 'CS-7A',
+      feeType: 'Tuition',
+      amount: 15000,
+      paidAmount: 10000,
+      dueDate: '2024-12-31',
+      academicYear: '2024-25',
+      semester: 'Semester 7',
+      status: 'Partial',
+      notes: 'Remaining 5000 due'
+    },
+    {
+      id: 'F004',
+      studentId: '150',
+      studentName: 'Raj Dwivedi',
+      rollNo: '2204280100150',
+      className: 'CS-7B',
+      feeType: 'Tuition',
+      amount: 15000,
+      paidAmount: 0,
+      dueDate: '2024-12-31',
+      academicYear: '2024-25',
+      semester: 'Semester 7',
+      status: 'Pending'
+    }
+  ];
+
+  // Payments
+  const payments = [
+    {
+      id: 'P001',
+      feeId: 'F001',
+      studentId: '176',
+      amount: 15000,
+      date: '2024-11-15',
+      paymentMode: 'Online Transfer',
+      receiptNo: 'RCPT001',
+      status: 'Completed'
+    },
+    {
+      id: 'P002',
+      feeId: 'F002',
+      studentId: '176',
+      amount: 2000,
+      date: '2024-11-20',
+      paymentMode: 'Cash',
+      receiptNo: 'RCPT002',
+      status: 'Completed'
+    },
+    {
+      id: 'P003',
+      feeId: 'F003',
+      studentId: '169',
+      amount: 10000,
+      date: '2024-11-18',
+      paymentMode: 'Cheque',
+      receiptNo: 'RCPT003',
+      status: 'Completed'
+    }
+  ];
+
   db.set(store.users, users);
   db.set(store.students, students);
   db.set(store.attendance, attendance);
+  db.set(store.fees, fees);
+  db.set(store.payments, payments);
   setSeeded(true);
 }
 
-function ensureSeed(){ if(!seeded()){ seedDemo() } }
+function ensureSeed(){ 
+  if(!seeded()){ 
+    seedDemo(); 
+  } else {
+    initFeeStores();
+  }
+}
 
 /* =====================
    Auth
@@ -106,7 +216,7 @@ const nav = $('#nav');
 const todayDate = $('#todayDate');
 
 // Sections
-const sections = ['teacherHome','manageStudents','takeAttendance','reports','studentHome'];
+const sections = ['teacherHome','manageStudents','takeAttendance','feeMonitoring','reports','studentHome','studentFees'];
 
 function show(el){ el.classList.remove('hide') }
 function hide(el){ el.classList.add('hide') }
@@ -213,6 +323,12 @@ studentsTbody.addEventListener('click', (e)=>{
       // also remove attendance
       const attendance = db.get(store.attendance, []);
       db.set(store.attendance, attendance.filter(r=>r.studentId!==id));
+      // also remove fees
+      const fees = db.get(store.fees, []);
+      db.set(store.fees, fees.filter(f=>f.studentId!==id));
+      // also remove payments
+      const payments = db.get(store.payments, []);
+      db.set(store.payments, payments.filter(p=>p.studentId!==id));
       listStudents(studentSearch.value); refreshClassFilter(); refreshTeacherStats();
     }
   }else if(act==='reset'){
@@ -355,11 +471,9 @@ function renderStudentHome(){
   const att = db.get(store.attendance, []).filter(r=> r.studentId===u.id && r.date.startsWith(month));
   const tbody = $('#stuTbody'); tbody.innerHTML='';
   let P=0, A=0; let streak=0; let prevDate=null;
-  // sort by date asc
   att.sort((a,b)=> a.date.localeCompare(b.date));
   for(const r of att){
     if(r.status==='P') P++; else A++;
-    // streak calc (consecutive present)
     if(r.status==='P'){
       if(!prevDate) streak=1; else {
         const d1 = new Date(prevDate), d2 = new Date(r.date);
@@ -383,6 +497,499 @@ $('#stuExportBtn').addEventListener('click', ()=>{
   const rows = buildAttendanceCSV(month, u.id);
   downloadCSV(rows, `attendance_${u.id}_${month}.csv`);
 })
+
+/* =====================
+   Fee Management
+   ===================== */
+let editingFeeId = null;
+
+function populateStudentDropdown() {
+  const students = db.get(store.students, []);
+  const select = $('#feeStudentSelect');
+  select.innerHTML = '<option value="">Select Student</option>';
+  students.forEach(student => {
+    const option = document.createElement('option');
+    option.value = student.id;
+    option.textContent = `${student.name} (${student.roll}) - ${student.class}`;
+    select.appendChild(option);
+  });
+}
+
+function populateFeeClassFilter() {
+  const students = db.get(store.students, []);
+  const classes = [...new Set(students.map(s => s.class))].sort();
+  const select = $('#feeClassFilter');
+  select.innerHTML = '<option value="">All Classes</option>';
+  classes.forEach(cls => {
+    const option = document.createElement('option');
+    option.value = cls;
+    option.textContent = cls;
+    select.appendChild(option);
+  });
+}
+
+function renderFeeTable() {
+  const fees = db.get(store.fees, []);
+  const classFilter = $('#feeClassFilter').value;
+  const statusFilter = $('#feeStatusFilter').value;
+  const searchQuery = $('#feeSearch').value.toLowerCase();
+
+  let filteredFees = fees;
+  
+  if (classFilter) filteredFees = filteredFees.filter(fee => fee.className === classFilter);
+  if (statusFilter) filteredFees = filteredFees.filter(fee => fee.status === statusFilter);
+  if (searchQuery) filteredFees = filteredFees.filter(fee => 
+    fee.studentName.toLowerCase().includes(searchQuery) || fee.rollNo.toLowerCase().includes(searchQuery)
+  );
+
+  const tbody = $('#feeTbody');
+  tbody.innerHTML = '';
+
+  filteredFees.forEach((fee, index) => {
+    const dueAmount = fee.amount - fee.paidAmount;
+    const dueDate = new Date(fee.dueDate);
+    const today = new Date();
+    const isOverdue = dueDate < today && fee.status !== 'Paid';
+    
+    let statusChip = '';
+    if (fee.status === 'Paid') {
+      statusChip = '<span class="chip ok">Paid</span>';
+    } else if (fee.status === 'Partial') {
+      statusChip = '<span class="chip warn">Partial</span>';
+    } else {
+      statusChip = isOverdue ? 
+        '<span class="chip bad">Overdue</span>' : 
+        '<span class="chip warn">Pending</span>';
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fee.studentName}</td>
+      <td>${fee.rollNo}</td>
+      <td>${fee.className}</td>
+      <td>${fee.feeType}</td>
+      <td>₹${fee.amount.toLocaleString()}</td>
+      <td>₹${fee.paidAmount.toLocaleString()}</td>
+      <td class="${isOverdue ? 'bad' : ''}">${fee.dueDate}</td>
+      <td>${statusChip}</td>
+      <td class="row">
+        <button class="btn small" data-act="record-payment" data-id="${fee.id}">Record Payment</button>
+        <button class="btn small" data-act="edit-fee" data-id="${fee.id}">Edit</button>
+        <button class="btn small danger" data-act="delete-fee" data-id="${fee.id}">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openFeeModal(fee = null) {
+  editingFeeId = fee ? fee.id : null;
+  
+  if (fee) {
+    $('#feeStudentSelect').value = fee.studentId;
+    $('#feeType').value = fee.feeType;
+    $('#feeAmount').value = fee.amount;
+    $('#feeDueDate').value = fee.dueDate;
+    $('#feeAcademicYear').value = fee.academicYear;
+    $('#feeSemester').value = fee.semester;
+    $('#feeStatus').value = fee.status;
+    $('#feePaidAmount').value = fee.paidAmount;
+    $('#feeNotes').value = fee.notes || '';
+    $('#feeStudentSelect').disabled = true;
+  } else {
+    $('#feeStudentSelect').value = '';
+    $('#feeType').value = 'Tuition';
+    $('#feeAmount').value = '';
+    $('#feeDueDate').value = new Date().toISOString().slice(0, 10);
+    $('#feeAcademicYear').value = '2024-25';
+    $('#feeSemester').value = 'Semester 1';
+    $('#feeStatus').value = 'Pending';
+    $('#feePaidAmount').value = '0';
+    $('#feeNotes').value = '';
+    $('#feeStudentSelect').disabled = false;
+  }
+  
+  $('#addFeeModal').classList.remove('hide');
+}
+
+function saveFeeRecord() {
+  const studentId = $('#feeStudentSelect').value;
+  if (!studentId) {
+    alert('Please select a student');
+    return;
+  }
+
+  const students = db.get(store.students, []);
+  const student = students.find(s => s.id === studentId);
+  if (!student) {
+    alert('Student not found');
+    return;
+  }
+
+  const feeType = $('#feeType').value;
+  const amount = parseFloat($('#feeAmount').value);
+  const paidAmount = parseFloat($('#feePaidAmount').value) || 0;
+  const dueDate = $('#feeDueDate').value;
+  const academicYear = $('#feeAcademicYear').value;
+  const semester = $('#feeSemester').value;
+  const status = $('#feeStatus').value;
+  const notes = $('#feeNotes').value;
+
+  if (!amount || amount <= 0) {
+    alert('Please enter a valid amount');
+    return;
+  }
+
+  if (paidAmount > amount) {
+    alert('Paid amount cannot exceed total amount');
+    return;
+  }
+
+  const fees = db.get(store.fees, []);
+  
+  if (editingFeeId) {
+    const index = fees.findIndex(f => f.id === editingFeeId);
+    if (index !== -1) {
+      fees[index] = {
+        ...fees[index],
+        feeType,
+        amount,
+        paidAmount,
+        dueDate,
+        academicYear,
+        semester,
+        status,
+        notes
+      };
+    }
+  } else {
+    const feeId = 'F' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    const newFee = {
+      id: feeId,
+      studentId: student.id,
+      studentName: student.name,
+      rollNo: student.roll,
+      className: student.class,
+      feeType,
+      amount,
+      paidAmount,
+      dueDate,
+      academicYear,
+      semester,
+      status,
+      notes,
+      createdAt: todayISO()
+    };
+    fees.push(newFee);
+  }
+
+  db.set(store.fees, fees);
+  
+  if (paidAmount > 0) {
+    const payments = db.get(store.payments, []);
+    const paymentId = 'P' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    const newPayment = {
+      id: paymentId,
+      feeId: editingFeeId || feeId,
+      studentId: student.id,
+      amount: paidAmount,
+      date: todayISO(),
+      paymentMode: 'Manual Entry',
+      receiptNo: 'RCPT' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+      status: 'Completed'
+    };
+    payments.push(newPayment);
+    db.set(store.payments, payments);
+  }
+
+  closeFeeModal();
+  renderFeeTable();
+  refreshFeeStats();
+}
+
+function closeFeeModal() {
+  $('#addFeeModal').classList.add('hide');
+  editingFeeId = null;
+}
+
+function recordPayment(feeId) {
+  const fees = db.get(store.fees, []);
+  const fee = fees.find(f => f.id === feeId);
+  
+  if (!fee) {
+    alert('Fee record not found');
+    return;
+  }
+
+  const paymentAmount = prompt(`Enter payment amount for ${fee.studentName} (Fee: ${fee.feeType})\nTotal: ₹${fee.amount}\nAlready Paid: ₹${fee.paidAmount}\nDue: ₹${fee.amount - fee.paidAmount}`, 
+    (fee.amount - fee.paidAmount).toString());
+  
+  if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
+    alert('Invalid payment amount');
+    return;
+  }
+
+  const payment = parseFloat(paymentAmount);
+  const totalPaid = fee.paidAmount + payment;
+  
+  if (totalPaid > fee.amount) {
+    alert('Payment amount exceeds total fee amount');
+    return;
+  }
+
+  fee.paidAmount = totalPaid;
+  fee.status = totalPaid === fee.amount ? 'Paid' : 'Partial';
+  
+  const payments = db.get(store.payments, []);
+  const paymentId = 'P' + Math.random().toString(36).slice(2, 8).toUpperCase();
+  const newPayment = {
+    id: paymentId,
+    feeId: fee.id,
+    studentId: fee.studentId,
+    amount: payment,
+    date: todayISO(),
+    paymentMode: 'Cash',
+    receiptNo: 'RCPT' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+    status: 'Completed'
+  };
+  payments.push(newPayment);
+
+  db.set(store.fees, fees);
+  db.set(store.payments, payments);
+  
+  alert(`Payment of ₹${payment.toLocaleString()} recorded successfully!\nReceipt No: ${newPayment.receiptNo}`);
+  
+  renderFeeTable();
+  refreshFeeStats();
+}
+
+function deleteFeeRecord(feeId) {
+  if (!confirm('Are you sure you want to delete this fee record?')) return;
+
+  const fees = db.get(store.fees, []);
+  const updatedFees = fees.filter(f => f.id !== feeId);
+  const payments = db.get(store.payments, []);
+  const updatedPayments = payments.filter(p => p.feeId !== feeId);
+  
+  db.set(store.fees, updatedFees);
+  db.set(store.payments, updatedPayments);
+  
+  renderFeeTable();
+  refreshFeeStats();
+}
+
+function refreshFeeStats() {
+  const fees = db.get(store.fees, []);
+  let totalAmount = 0;
+  let totalPaid = 0;
+  let pendingFees = 0;
+  let overdueFees = 0;
+  const today = new Date();
+  
+  fees.forEach(fee => {
+    totalAmount += fee.amount;
+    totalPaid += fee.paidAmount;
+    
+    if (fee.status !== 'Paid') {
+      pendingFees++;
+      const dueDate = new Date(fee.dueDate);
+      if (dueDate < today) overdueFees++;
+    }
+  });
+}
+
+function generateFeeReport() {
+  const fees = db.get(store.fees, []);
+  const students = db.get(store.students, []);
+  const payments = db.get(store.payments, []);
+  
+  const reportData = [];
+  
+  const classSummary = {};
+  fees.forEach(fee => {
+    if (!classSummary[fee.className]) {
+      classSummary[fee.className] = { totalAmount: 0, totalPaid: 0, students: new Set() };
+    }
+    classSummary[fee.className].totalAmount += fee.amount;
+    classSummary[fee.className].totalPaid += fee.paidAmount;
+    classSummary[fee.className].students.add(fee.studentId);
+  });
+  
+  reportData.push(['FEE MONITORING REPORT', '', '', '', '', '']);
+  reportData.push(['Generated on:', new Date().toLocaleDateString(), '', '', '', '']);
+  reportData.push(['', '', '', '', '', '']);
+  
+  reportData.push(['CLASS-WISE SUMMARY', '', '', '', '', '']);
+  reportData.push(['Class', 'Students', 'Total Fees (₹)', 'Paid (₹)', 'Due (₹)', 'Collection %']);
+  
+  for (const [className, data] of Object.entries(classSummary)) {
+    const dueAmount = data.totalAmount - data.totalPaid;
+    const collectionPercentage = data.totalAmount > 0 ? 
+      Math.round((data.totalPaid / data.totalAmount) * 100) : 0;
+    
+    reportData.push([
+      className,
+      data.students.size,
+      data.totalAmount.toLocaleString(),
+      data.totalPaid.toLocaleString(),
+      dueAmount.toLocaleString(),
+      collectionPercentage + '%'
+    ]);
+  }
+  
+  reportData.push(['', '', '', '', '', '']);
+  
+  reportData.push(['DETAILED FEE LIST', '', '', '', '', '']);
+  reportData.push(['Student Name', 'Roll No', 'Class', 'Fee Type', 'Amount (₹)', 'Paid (₹)', 'Due (₹)', 'Status', 'Due Date']);
+  
+  fees.forEach(fee => {
+    const dueAmount = fee.amount - fee.paidAmount;
+    reportData.push([
+      fee.studentName,
+      fee.rollNo,
+      fee.className,
+      fee.feeType,
+      fee.amount.toLocaleString(),
+      fee.paidAmount.toLocaleString(),
+      dueAmount.toLocaleString(),
+      fee.status,
+      fee.dueDate
+    ]);
+  });
+  
+  reportData.push(['', '', '', '', '', '', '', '', '']);
+  
+  reportData.push(['PAYMENT SUMMARY (Last 30 days)', '', '', '', '', '']);
+  reportData.push(['Date', 'Student', 'Amount (₹)', 'Payment Mode', 'Receipt No', 'Status']);
+  
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentPayments = payments.filter(p => new Date(p.date) >= thirtyDaysAgo);
+  recentPayments.forEach(payment => {
+    const student = students.find(s => s.id === payment.studentId);
+    reportData.push([
+      payment.date,
+      student ? student.name : payment.studentId,
+      payment.amount.toLocaleString(),
+      payment.paymentMode,
+      payment.receiptNo,
+      payment.status
+    ]);
+  });
+  
+  downloadCSV(reportData, `fee_report_${todayISO()}.csv`);
+}
+
+/* =====================
+   Student Fee View
+   ===================== */
+function renderStudentFeeView() {
+  const user = auth.current;
+  if (!user || user.role !== 'student') return;
+  
+  const fees = db.get(store.fees, []).filter(fee => fee.studentId === user.id);
+  const payments = db.get(store.payments, []).filter(payment => payment.studentId === user.id);
+  
+  let totalFees = 0;
+  let paidFees = 0;
+  let pendingCount = 0;
+  
+  fees.forEach(fee => {
+    totalFees += fee.amount;
+    paidFees += fee.paidAmount;
+    if (fee.status !== 'Paid') pendingCount++;
+  });
+  
+  $('#stuTotalFees').textContent = `₹${totalFees.toLocaleString()}`;
+  $('#stuPaidFees').textContent = `₹${paidFees.toLocaleString()}`;
+  $('#stuDueFees').textContent = `₹${(totalFees - paidFees).toLocaleString()}`;
+  $('#stuPendingCount').textContent = pendingCount;
+  
+  const feeTbody = $('#stuFeeTbody');
+  feeTbody.innerHTML = '';
+  
+  fees.forEach(fee => {
+    const dueAmount = fee.amount - fee.paidAmount;
+    const dueDate = new Date(fee.dueDate);
+    const today = new Date();
+    const isOverdue = dueDate < today && fee.status !== 'Paid';
+    
+    let statusChip = '';
+    if (fee.status === 'Paid') {
+      statusChip = '<span class="chip ok">Paid</span>';
+    } else if (fee.status === 'Partial') {
+      statusChip = '<span class="chip warn">Partial</span>';
+    } else {
+      statusChip = isOverdue ? 
+        '<span class="chip bad">Overdue</span>' : 
+        '<span class="chip warn">Pending</span>';
+    }
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fee.feeType}</td>
+      <td>${fee.academicYear}</td>
+      <td>${fee.semester}</td>
+      <td>₹${fee.amount.toLocaleString()}</td>
+      <td>₹${fee.paidAmount.toLocaleString()}</td>
+      <td class="${dueAmount > 0 ? 'bad' : ''}">₹${dueAmount.toLocaleString()}</td>
+      <td class="${isOverdue ? 'bad' : ''}">${fee.dueDate}</td>
+      <td>${statusChip}</td>
+    `;
+    feeTbody.appendChild(tr);
+  });
+  
+  const paymentTbody = $('#stuPaymentTbody');
+  paymentTbody.innerHTML = '';
+  
+  payments.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(payment => {
+    const fee = fees.find(f => f.id === payment.feeId);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${payment.date}</td>
+      <td>${fee ? fee.feeType : 'N/A'}</td>
+      <td>₹${payment.amount.toLocaleString()}</td>
+      <td>${payment.paymentMode}</td>
+      <td><code>${payment.receiptNo}</code></td>
+      <td><span class="chip ok">${payment.status}</span></td>
+    `;
+    paymentTbody.appendChild(tr);
+  });
+}
+
+function downloadFeeReceipt() {
+  const user = auth.current;
+  if (!user || user.role !== 'student') return;
+  
+  const payments = db.get(store.payments, []).filter(p => p.studentId === user.id);
+  const latestPayment = payments.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  
+  if (!latestPayment) {
+    alert('No payment records found');
+    return;
+  }
+  
+  const fees = db.get(store.fees, []);
+  const fee = fees.find(f => f.id === latestPayment.feeId);
+  
+  const receiptData = [
+    ['UGIverse - Fee Payment Receipt', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['Receipt No:', latestPayment.receiptNo, '', 'Date:', latestPayment.date],
+    ['Student Name:', user.name, '', 'Roll No:', user.roll || user.id],
+    ['Fee Type:', fee ? fee.feeType : 'N/A', '', 'Academic Year:', fee ? fee.academicYear : 'N/A'],
+    ['', '', '', '', ''],
+    ['Amount Paid (₹):', latestPayment.amount.toLocaleString(), '', '', ''],
+    ['Payment Mode:', latestPayment.paymentMode, '', 'Status:', latestPayment.status],
+    ['', '', '', '', ''],
+    ['Authorized Signature', '', '', 'Student Signature', ''],
+    ['', '', '', '', ''],
+    ['Note: This is a computer-generated receipt.', '', '', '', '']
+  ];
+  
+  downloadCSV(receiptData, `fee_receipt_${latestPayment.receiptNo}.csv`);
+}
 
 /* =====================
    CSV helpers
@@ -417,18 +1024,27 @@ function enterDashboard(){
     $('#navTeacherHome').classList.remove('hide');
     $('#navManageStudents').classList.remove('hide');
     $('#navTakeAttendance').classList.remove('hide');
+    $('#navFeeMonitoring').classList.remove('hide');
     $('#navReports').classList.remove('hide');
     $('#navStudentHome').classList.add('hide');
+    $('#navStudentFees').classList.add('hide');
     setActive('teacherHome'); refreshTeacherStats(); listStudents(); refreshClassFilter();
     attDate.value = todayISO(); renderAttendanceTable();
     $('#repMonth').value = monISO(); renderReports();
+    populateStudentDropdown();
+    populateFeeClassFilter();
+    renderFeeTable();
+    refreshFeeStats();
   }else{
     $('#navTeacherHome').classList.add('hide');
     $('#navManageStudents').classList.add('hide');
     $('#navTakeAttendance').classList.add('hide');
+    $('#navFeeMonitoring').classList.add('hide');
     $('#navReports').classList.add('hide');
     $('#navStudentHome').classList.remove('hide');
+    $('#navStudentFees').classList.remove('hide');
     setActive('studentHome'); $('#stuMonth').value = monISO(); renderStudentHome();
+    renderStudentFeeView();
   }
 }
 
@@ -460,14 +1076,68 @@ nav.addEventListener('click', (e)=>{
   if(target==='reports') renderReports();
   if(target==='takeAttendance') renderAttendanceTable();
   if(target==='studentHome') renderStudentHome();
+  if(target==='feeMonitoring') {
+    populateStudentDropdown();
+    populateFeeClassFilter();
+    renderFeeTable();
+    refreshFeeStats();
+  }
+  if(target==='studentFees') renderStudentFeeView();
 })
 
 // Quick actions
 $('#quickTakeBtn').addEventListener('click', ()=>{ setActive('takeAttendance'); renderAttendanceTable() });
 $('#seedBtn').addEventListener('click', ()=>{ if(confirm('Reset demo data?')){ seedDemo(); refreshLandingStats(); refreshTeacherStats(); listStudents(); renderAttendanceTable(); renderReports(); } })
 
-// Bootstrap
+// Fee Event Listeners
+$('#addFeeRecordBtn').addEventListener('click', () => openFeeModal());
+$('#closeFeeModal').addEventListener('click', closeFeeModal);
+$('#cancelFeeBtn').addEventListener('click', closeFeeModal);
+$('#saveFeeBtn').addEventListener('click', saveFeeRecord);
+$('#generateFeeReportBtn').addEventListener('click', generateFeeReport);
+$('#feeClassFilter').addEventListener('change', renderFeeTable);
+$('#feeStatusFilter').addEventListener('change', renderFeeTable);
+$('#feeSearch').addEventListener('input', renderFeeTable);
+$('#downloadFeeReceiptBtn').addEventListener('click', downloadFeeReceipt);
+
+$('#feeTbody').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const feeId = btn.dataset.id;
+  const action = btn.dataset.act;
+  if (action === 'record-payment') recordPayment(feeId);
+  else if (action === 'edit-fee') {
+    const fees = db.get(store.fees, []);
+    const fee = fees.find(f => f.id === feeId);
+    if (fee) openFeeModal(fee);
+  } else if (action === 'delete-fee') deleteFeeRecord(feeId);
+});
+
+// Student fee tabs
+$('.tabs').addEventListener('click', (e) => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  $$('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const tabType = tab.dataset.tab;
+  if (tabType === 'current') {
+    $('#currentFeesTable').classList.remove('hide');
+    $('#paymentHistoryTable').classList.add('hide');
+  } else if (tabType === 'history') {
+    $('#currentFeesTable').classList.add('hide');
+    $('#paymentHistoryTable').classList.remove('hide');
+  }
+});
+
+/* =====================
+   Bootstrap
+   ===================== */
 ensureSeed();
 refreshLandingStats();
 todayDate.textContent = new Date().toLocaleDateString();
-const existing = auth.load(); if(existing){ enterDashboard() } else { leaveDashboard() }
+const existing = auth.load(); 
+if(existing){ 
+  enterDashboard(); 
+} else { 
+  leaveDashboard(); 
+}
