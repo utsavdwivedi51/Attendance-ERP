@@ -30,9 +30,6 @@ This project provides a simple interface for:
 | Logic         | app.js                   |
 | Tools         | Git, GitHub              |
 
-## Preview
-<img width="1292" height="609" alt="image" src="https://github.com/user-attachments/assets/e486c96f-f002-4862-876a-d7e34d6a57dd" />
-
 ## Project Structure
 
 Attendance-ERP/
