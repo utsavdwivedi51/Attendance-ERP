@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance ERP – Student & Teacher Portal</title>
+  <title>Attendance ERP – Admin, Teacher & Student Portal</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -470,7 +470,7 @@
   <main class="auth-wrap" id="authPage">
     <div class="auth">
       <div class="illustration card">
-        <h1>Student & Teacher Portal</h1>
+        <h1>Admin, Teacher & Student Portal</h1>
         <p>Developed by <strong>UGIverse</strong></p> <p> Your whole college universe in one website </p>
         <div style="height:16px"></div>
         <div class="grid cols-2">
@@ -479,8 +479,8 @@
             <div class="muted">Students</div>
           </div>
           <div class="stat">
-            <div class="big" id="statClasses">0</div>
-            <div class="muted">Classes</div>
+            <div class="big" id="statTeachers">0</div>
+            <div class="muted">Teachers</div>
           </div>
           <div class="stat">
             <div class="big" id="statToday">0%</div>
@@ -499,18 +499,19 @@
           <div class="field">
             <label>Login as</label>
             <div class="row">
-              <label class="row"><input type="radio" name="role" value="teacher" checked> &nbsp;Teacher</label>
+              <label class="row"><input type="radio" name="role" value="admin" checked> &nbsp;Admin</label>
+              <label class="row"><input type="radio" name="role" value="teacher"> &nbsp;Teacher</label>
               <label class="row"><input type="radio" name="role" value="student"> &nbsp;Student</label>
             </div>
           </div>
           <div class="field">
             <label>Email / ID</label>
-            <input class="input" id="loginId" placeholder="Jitendra Kumar" />
+            <input class="input" id="loginId" placeholder="admin@ugiverse.com" />
           </div>
           <div class="field">
             <label>Password</label>
             <div class="row" style="width:100%">
-              <input class="input" id="loginPass" type="password" placeholder="teacher123" style="flex:1" />
+              <input class="input" id="loginPass" type="password" placeholder="admin123" style="flex:1" />
               <button class="btn small" id="togglePass" type="button">Show</button>
             </div>
             <small style="color:var(--muted)"> <code></code>  <code></code></small>
@@ -529,15 +530,22 @@
     <aside class="side card pad">
       <div class="row" style="justify-content:space-between">
         <div id="userName" style="font-weight:800">User</div>
-        <div class="pill" id="userRole">teacher</div>
+        <div class="pill" id="userRole">admin</div>
       </div>
       <div class="nav" id="nav">
-        <div class="item active" data-target="teacherHome" id="navTeacherHome">Overview</div>
-        <div class="item" data-target="manageStudents" id="navManageStudents">Students</div>
-        <div class="item" data-target="takeAttendance" id="navTakeAttendance">Take Attendance</div>
-        <div class="item" data-target="feeMonitoring" id="navFeeMonitoring">Fee Monitoring</div>
-        <div class="item" data-target="reports" id="navReports">Reports</div>
+        <!-- Admin Navigation -->
+        <div class="item active hide" data-target="adminHome" id="navAdminHome">Overview</div>
+        <div class="item hide" data-target="manageStudents" id="navManageStudents">Manage Students</div>
+        <div class="item hide" data-target="manageTeachers" id="navManageTeachers">Manage Teachers</div>
+        <div class="item hide" data-target="feeMonitoring" id="navFeeMonitoring">Fee Monitoring</div>
+        <div class="item hide" data-target="adminReports" id="navAdminReports">Reports</div>
 
+        <!-- Teacher Navigation -->
+        <div class="item hide" data-target="teacherHome" id="navTeacherHome">Overview</div>
+        <div class="item hide" data-target="takeAttendance" id="navTakeAttendance">Take Attendance</div>
+        <div class="item hide" data-target="teacherReports" id="navTeacherReports">Attendance Reports</div>
+
+        <!-- Student Navigation -->
         <div class="item hide" data-target="studentHome" id="navStudentHome">My Attendance</div>
         <div class="item hide" data-target="studentFees" id="navStudentFees">My Fees</div>
       </div>
@@ -547,43 +555,42 @@
     </aside>
 
     <main class="section">
-      <!-- TEACHER OVERVIEW -->
-      <div id="teacherHome" class="card pad">
+      <!-- ADMIN OVERVIEW -->
+      <div id="adminHome" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
           <div>
-            <h2 style="margin:0">Overview</h2>
-            <p style="margin:6px 0 0 0; color:var(--muted)">Quick stats for today: <span id="todayDate"></span></p>
+            <h2 style="margin:0">Admin Dashboard</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">System overview and quick stats: <span id="todayDate"></span></p>
           </div>
           <div class="row">
             <button class="btn" id="seedBtn">Reset Demo Data</button>
-            <button class="btn primary" id="quickTakeBtn">Quick Take</button>
           </div>
         </div>
         <div class="stats" style="margin-top:14px">
           <div class="stat">
-            <div class="big" id="tStatStudents">0</div>
+            <div class="big" id="aStatStudents">0</div>
             <div>Students</div>
           </div>
           <div class="stat">
-            <div class="big" id="tStatClasses">0</div>
-            <div>Classes</div>
+            <div class="big" id="aStatTeachers">0</div>
+            <div>Teachers</div>
           </div>
           <div class="stat">
-            <div class="big" id="tStatPresent">0%</div>
+            <div class="big" id="aStatPresent">0%</div>
             <div>Present Today</div>
           </div>
           <div class="stat">
-            <div class="big" id="tStatRecords">0</div>
-            <div>Total Records</div>
+            <div class="big" id="aStatFees">₹0</div>
+            <div>Total Fees</div>
           </div>
         </div>
       </div>
 
-      <!-- MANAGE STUDENTS -->
+      <!-- MANAGE STUDENTS (Admin only) -->
       <div id="manageStudents" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
           <div>
-            <h2 style="margin:0">Students</h2>
+            <h2 style="margin:0">Manage Students</h2>
             <p style="margin:6px 0 0 0; color:var(--muted)">Add, edit or remove students. Students can log in with their ID and password.</p>
           </div>
           <div class="row">
@@ -637,7 +644,64 @@
         </div>
       </div>
 
-      <!-- TAKE ATTENDANCE -->
+      <!-- MANAGE TEACHERS (Admin only) -->
+      <div id="manageTeachers" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Manage Teachers</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Add, edit or remove teachers. Teachers can mark attendance.</p>
+          </div>
+          <div class="row">
+            <input class="input" id="teacherSearch" placeholder="Search by name or email" />
+            <button class="btn" id="exportTeachersBtn">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="grid cols-3" style="margin-top:12px">
+          <div class="field">
+            <label>Full Name</label>
+            <input class="input" id="tName" placeholder="Enter Teacher Name" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input class="input" id="tEmail" placeholder="Enter email" />
+          </div>
+          <div class="field">
+            <label>Department</label>
+            <input class="input" id="tDept" placeholder="Enter Department" />
+          </div>
+          <div class="field">
+            <label>Employee ID</label>
+            <input class="input" id="tEmpId" placeholder="Enter Employee ID" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input class="input" id="tPass" placeholder="Set a password" />
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn success" id="addTeacherBtn">Add Teacher</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0; margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Emp ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teachersTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAKE ATTENDANCE (Teacher only) -->
       <div id="takeAttendance" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
           <div>
@@ -675,7 +739,7 @@
         </div>
       </div>
 
-      <!-- FEE MONITORING (Teacher) -->
+      <!-- FEE MONITORING (Admin only) -->
       <div id="feeMonitoring" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
           <div>
@@ -883,12 +947,12 @@
         </div>
       </div>
 
-      <!-- REPORTS -->
-      <div id="reports" class="card pad hide">
+      <!-- ADMIN REPORTS -->
+      <div id="adminReports" class="card pad hide">
         <div class="row" style="justify-content:space-between; align-items:flex-end">
           <div>
-            <h2 style="margin:0">Reports</h2>
-            <p style="margin:6px 0 0 0; color:var(--muted)">Download attendance or view per-student summaries.</p>
+            <h2 style="margin:0">System Reports</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Download attendance reports or view summaries.</p>
           </div>
           <div class="row">
             <input type="month" class="input" id="repMonth">
@@ -908,6 +972,71 @@
               </tr>
             </thead>
             <tbody id="repTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TEACHER OVERVIEW -->
+      <div id="teacherHome" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Teacher Dashboard</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Welcome, <span id="teacherWelcome"></span></p>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="quickTakeBtn">Take Attendance</button>
+          </div>
+        </div>
+        <div class="stats" style="margin-top:14px">
+          <div class="stat">
+            <div class="big" id="teacherStatStudents">0</div>
+            <div>Students</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="teacherStatClasses">0</div>
+            <div>Classes</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="teacherStatPresent">0%</div>
+            <div>Present Today</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="teacherStatRecords">0</div>
+            <div>Total Records</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEACHER REPORTS -->
+      <div id="teacherReports" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Attendance Reports</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">View attendance reports by class.</p>
+          </div>
+          <div class="row">
+            <input type="month" class="input" id="teacherRepMonth">
+            <button class="btn" id="teacherExportBtn">Export CSV</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <select id="teacherClassFilter" class="input" style="max-width:220px">
+            <option value="">All Classes</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0; margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Roll</th>
+                <th>Class</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody id="teacherRepTbody"></tbody>
           </table>
         </div>
       </div>
@@ -1199,7 +1328,8 @@
     }
 
     const store = {
-      users: 'sl_users',
+      admins: 'sl_admins',
+      teachers: 'sl_teachers',
       students: 'sl_students',
       attendance: 'sl_attendance',
       fees: 'sl_fees',
@@ -1216,15 +1346,22 @@
     function initFeeStores() {
       if (!db.get(store.fees)) db.set(store.fees, []);
       if (!db.get(store.payments)) db.set(store.payments, []);
+      if (!db.get(store.admins)) db.set(store.admins, []);
+      if (!db.get(store.teachers)) db.set(store.teachers, []);
     }
 
     function seedDemo(){
-      // Teacher
-      const users = [
-        { id: 'T001', role:'teacher', email:'Jitendra Kumar', password:'teacher123', name:'Admin Jitendra Kumar' },
-        { id: 'T002', role:'teacher', email:'Naman Jaiswal', password:'teacher123', name:'Admin Naman Jaiswal' },
-        { id: 'T003', role:'teacher', email:'Jyoti Srivastava', password:'teacher123', name:'Admin Jyoti Srivastava' },
-        { id: 'T004', role:'teacher', email:'Devendra Awasthi', password:'teacher123', name:'Admin Devendra Awasthi' }
+      // Admin
+      const admins = [
+        { id: 'A001', role:'admin', email:'admin@ugiverse.com', password:'admin123', name:'Admin User' }
+      ];
+
+      // Teachers
+      const teachers = [
+        { id: 'T001', role:'teacher', email:'jitendra@ugiverse.com', password:'teacher123', name:'Jitendra Kumar', department:'Computer Science', empId:'EMP001' },
+        { id: 'T002', role:'teacher', email:'naman@ugiverse.com', password:'teacher123', name:'Naman Jaiswal', department:'Mathematics', empId:'EMP002' },
+        { id: 'T003', role:'teacher', email:'jyoti@ugiverse.com', password:'teacher123', name:'Jyoti Srivastava', department:'Physics', empId:'EMP003' },
+        { id: 'T004', role:'teacher', email:'devendra@ugiverse.com', password:'teacher123', name:'Devendra Awasthi', department:'Chemistry', empId:'EMP004' }
       ];
 
       // Students
@@ -1347,7 +1484,8 @@
         }
       ];
 
-      db.set(store.users, users);
+      db.set(store.admins, admins);
+      db.set(store.teachers, teachers);
       db.set(store.students, students);
       db.set(store.attendance, attendance);
       db.set(store.fees, fees);
@@ -1369,12 +1507,16 @@
     const auth = {
       current: null,
       login(idOrEmail, password, role){
-        const users = db.get(store.users, []);
-        const students = db.get(store.students, []);
-        if(role === 'teacher'){
-          const u = users.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
+        if(role === 'admin'){
+          const admins = db.get(store.admins, []);
+          const u = admins.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
           if(u){ this.current = u; sessionStorage.setItem('sl_user', JSON.stringify(u)); return {ok:true, user:u} }
-        }else{
+        } else if(role === 'teacher'){
+          const teachers = db.get(store.teachers, []);
+          const u = teachers.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
+          if(u){ this.current = u; sessionStorage.setItem('sl_user', JSON.stringify(u)); return {ok:true, user:u} }
+        } else if(role === 'student'){
+          const students = db.get(store.students, []);
           const s = students.find(s=> (s.id===idOrEmail || s.email?.toLowerCase()===idOrEmail.toLowerCase()) && s.password===password);
           if(s){ this.current = {...s, role:'student'}; sessionStorage.setItem('sl_user', JSON.stringify(this.current)); return {ok:true, user:this.current} }
         }
@@ -1404,7 +1546,7 @@
     const todayDate = $('#todayDate');
 
     // Sections
-    const sections = ['teacherHome','manageStudents','takeAttendance','feeMonitoring','reports','studentHome','studentFees'];
+    const sections = ['adminHome','manageStudents','manageTeachers','feeMonitoring','adminReports','teacherHome','takeAttendance','teacherReports','studentHome','studentFees'];
 
     function show(el){ el.classList.remove('hide') }
     function hide(el){ el.classList.add('hide') }
@@ -1417,15 +1559,34 @@
     // Stats on Auth page
     function refreshLandingStats(){
       const students = db.get(store.students, []);
+      const teachers = db.get(store.teachers, []);
       const att = db.get(store.attendance, []);
       const classes = [...new Set(students.map(s=>s.class))];
       const today = todayISO();
       const todays = att.filter(r=>r.date===today);
       const present = todays.filter(r=>r.status==='P').length;
       $('#statStudents').textContent = students.length;
-      $('#statClasses').textContent = classes.length;
+      $('#statTeachers').textContent = teachers.length;
       $('#statRecords').textContent = att.length;
       $('#statToday').textContent = todays.length? Math.round(present/todays.length*100)+'%':'0%';
+    }
+
+    function refreshAdminStats(){
+      const students = db.get(store.students, []);
+      const teachers = db.get(store.teachers, []);
+      const att = db.get(store.attendance, []);
+      const fees = db.get(store.fees, []);
+      const classes = [...new Set(students.map(s=>s.class))];
+      const today = todayISO();
+      const todays = att.filter(r=>r.date===today);
+      const present = todays.filter(r=>r.status==='P').length;
+      const totalFees = fees.reduce((sum, fee) => sum + fee.amount, 0);
+      
+      $('#aStatStudents').textContent = students.length;
+      $('#aStatTeachers').textContent = teachers.length;
+      $('#aStatPresent').textContent = todays.length? Math.round(present/todays.length*100)+'%':'0%';
+      $('#aStatFees').textContent = '₹' + totalFees.toLocaleString();
+      todayDate.textContent = new Date().toLocaleDateString();
     }
 
     function refreshTeacherStats(){
@@ -1435,15 +1596,15 @@
       const today = todayISO();
       const todays = att.filter(r=>r.date===today);
       const present = todays.filter(r=>r.status==='P').length;
-      $('#tStatStudents').textContent = students.length;
-      $('#tStatClasses').textContent = classes.length;
-      $('#tStatRecords').textContent = att.length;
-      $('#tStatPresent').textContent = todays.length? Math.round(present/todays.length*100)+'%':'0%';
-      todayDate.textContent = new Date().toLocaleDateString();
+      $('#teacherStatStudents').textContent = students.length;
+      $('#teacherStatClasses').textContent = classes.length;
+      $('#teacherStatRecords').textContent = att.length;
+      $('#teacherStatPresent').textContent = todays.length? Math.round(present/todays.length*100)+'%':'0%';
+      $('#teacherWelcome').textContent = auth.current?.name || '';
     }
 
     /* =====================
-       Students CRUD
+       Students CRUD (Admin only)
        ===================== */
     const sName = $('#sName');
     const sRoll = $('#sRoll');
@@ -1483,6 +1644,10 @@
       const classes = [...new Set(students.map(s=>s.class))].sort();
       const sel = $('#classFilter');
       sel.innerHTML = '<option value="">All Classes</option>' + classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+      
+      // Also refresh teacher class filter
+      const teacherSel = $('#teacherClassFilter');
+      teacherSel.innerHTML = '<option value="">All Classes</option>' + classes.map(c=>`<option value="${c}">${c}</option>`).join('');
     }
 
     addStudentBtn.addEventListener('click', ()=>{
@@ -1500,6 +1665,7 @@
       sName.value = sRoll.value = sClass.value = sEmail.value = sPass.value = '';
       listStudents(studentSearch.value);
       refreshClassFilter();
+      refreshAdminStats();
       refreshTeacherStats();
     })
 
@@ -1521,7 +1687,7 @@
           // also remove payments
           const payments = db.get(store.payments, []);
           db.set(store.payments, payments.filter(p=>p.studentId!==id));
-          listStudents(studentSearch.value); refreshClassFilter(); refreshTeacherStats();
+          listStudents(studentSearch.value); refreshClassFilter(); refreshAdminStats(); refreshTeacherStats();
         }
       }else if(act==='reset'){
         const npw = prompt('Enter new password for '+students[idx].name, 'pass123');
@@ -1539,7 +1705,85 @@
     })
 
     /* =====================
-       Take Attendance
+       Teachers CRUD (Admin only)
+       ===================== */
+    const tName = $('#tName');
+    const tEmail = $('#tEmail');
+    const tDept = $('#tDept');
+    const tEmpId = $('#tEmpId');
+    const tPass = $('#tPass');
+    const addTeacherBtn = $('#addTeacherBtn');
+    const teachersTbody = $('#teachersTbody');
+    const teacherSearch = $('#teacherSearch');
+
+    function listTeachers(filter=''){
+      const teachers = db.get(store.teachers, []);
+      const q = filter.toLowerCase();
+      const filtered = teachers.filter(t=> [t.name, t.email, t.department, t.empId].some(x=> String(x).toLowerCase().includes(q)));
+
+      teachersTbody.innerHTML = '';
+      filtered.forEach((t, i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${t.name}</td>
+          <td>${t.email}</td>
+          <td>${t.department}</td>
+          <td><code>${t.empId}</code></td>
+          <td class="row">
+            <button class="btn small" data-act="reset" data-id="${t.id}">Reset PW</button>
+            <button class="btn small danger" data-act="del" data-id="${t.id}">Delete</button>
+          </td>
+        `;
+        teachersTbody.appendChild(tr);
+      })
+    }
+
+    addTeacherBtn.addEventListener('click', ()=>{
+      const name = tName.value.trim();
+      const email = tEmail.value.trim();
+      const dept = tDept.value.trim();
+      const empId = tEmpId.value.trim();
+      const pass = tPass.value.trim() || 'teacher123';
+      if(!name || !email || !dept || !empId){ alert('All fields are required'); return }
+      const teachers = db.get(store.teachers, []);
+      const id = 'T' + empId;
+      if(teachers.some(x=>x.id===id)){ alert('A teacher with this employee ID already exists.'); return }
+      teachers.push({ id, name, email, department: dept, empId, password: pass, role: 'teacher' });
+      db.set(store.teachers, teachers);
+      tName.value = tEmail.value = tDept.value = tEmpId.value = tPass.value = '';
+      listTeachers(teacherSearch.value);
+      refreshAdminStats();
+    })
+
+    teachersTbody.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const id = btn.dataset.id; const act = btn.dataset.act;
+      const teachers = db.get(store.teachers, []);
+      const idx = teachers.findIndex(t=>t.id===id);
+      if(idx===-1) return;
+      if(act==='del'){
+        if(confirm('Delete this teacher?')){
+          teachers.splice(idx,1); db.set(store.teachers, teachers);
+          listTeachers(teacherSearch.value); refreshAdminStats();
+        }
+      }else if(act==='reset'){
+        const npw = prompt('Enter new password for '+teachers[idx].name, 'teacher123');
+        if(npw){ teachers[idx].password=npw; db.set(store.teachers, teachers); alert('Password updated.') }
+      }
+    })
+
+    teacherSearch.addEventListener('input', e=> listTeachers(e.target.value));
+
+    // Export teachers CSV
+    $('#exportTeachersBtn').addEventListener('click', ()=>{
+      const teachers = db.get(store.teachers, []);
+      const rows = [['ID','Name','Email','Department','Employee ID']].concat(teachers.map(t=>[t.id,t.name,t.email,t.department,t.empId]))
+      downloadCSV(rows, 'teachers.csv');
+    })
+
+    /* =====================
+       Take Attendance (Teacher only)
        ===================== */
     const attTbody = $('#attTbody');
     const attDate = $('#attDate');
@@ -1590,7 +1834,7 @@
       const idx = att.findIndex(r=> r.date===date && r.studentId===sid);
       if(idx>-1){ att[idx].status=status } else { att.push({date, studentId:sid, status}) }
       db.set(store.attendance, att);
-      renderAttendanceTable(); refreshTeacherStats(); refreshLandingStats();
+      renderAttendanceTable(); refreshAdminStats(); refreshTeacherStats(); refreshLandingStats();
     })
 
     $('#classFilter').addEventListener('change', renderAttendanceTable);
@@ -1609,25 +1853,32 @@
         const idx = att.findIndex(r=> r.date===date && r.studentId===s.id);
         if(idx>-1) att[idx].status='P'; else att.push({date, studentId:s.id, status:'P'});
       }
-      db.set(store.attendance, att); renderAttendanceTable(); refreshTeacherStats();
+      db.set(store.attendance, att); renderAttendanceTable(); refreshAdminStats(); refreshTeacherStats();
     })
     
     clearMarksBtn.addEventListener('click', ()=>{
       const date = attDate.value || todayISO();
       let att = db.get(store.attendance, []);
       att = att.filter(r=> r.date !== date);
-      db.set(store.attendance, att); renderAttendanceTable(); refreshTeacherStats();
+      db.set(store.attendance, att); renderAttendanceTable(); refreshAdminStats(); refreshTeacherStats();
     })
 
-    // Export attendance CSV
+    // Export attendance CSV (Admin)
     $('#exportAttendanceBtn').addEventListener('click', ()=>{
       const month = $('#repMonth').value || monISO();
       const rows = buildAttendanceCSV(month);
       downloadCSV(rows, `attendance_${month}.csv`);
     })
 
-    // Reports table
-    function renderReports(){
+    // Export attendance CSV (Teacher)
+    $('#teacherExportBtn').addEventListener('click', ()=>{
+      const month = $('#teacherRepMonth').value || monISO();
+      const rows = buildAttendanceCSV(month);
+      downloadCSV(rows, `attendance_${month}.csv`);
+    })
+
+    // Admin Reports table
+    function renderAdminReports(){
       const month = $('#repMonth').value || monISO();
       const students = db.get(store.students, []);
       const att = db.get(store.attendance, []);
@@ -1640,6 +1891,37 @@
       const tbody = $('#repTbody');
       tbody.innerHTML='';
       for(const s of students){
+        const o = byStu.get(s.id) || {P:0,A:0};
+        const total = o.P + o.A; const pct = total? Math.round(o.P/total*100) : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.roll}</td>
+          <td>${s.class}</td>
+          <td>${o.P}</td>
+          <td>${o.A}</td>
+          <td><span class="chip ${pct>=75?'ok':pct>=50?'warn':'bad'}">${pct}%</span></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Teacher Reports table
+    function renderTeacherReports(){
+      const month = $('#teacherRepMonth').value || monISO();
+      const classFilter = $('#teacherClassFilter').value;
+      const students = db.get(store.students, []);
+      const att = db.get(store.attendance, []);
+      const inMonth = att.filter(r=> r.date.startsWith(month));
+      const byStu = new Map();
+      for(const r of inMonth){
+        const o = byStu.get(r.studentId) || {P:0,A:0};
+        o[r.status]++; byStu.set(r.studentId, o);
+      }
+      const tbody = $('#teacherRepTbody');
+      tbody.innerHTML='';
+      for(const s of students){
+        if(classFilter && s.class !== classFilter) continue;
         const o = byStu.get(s.id) || {P:0,A:0};
         const total = o.P + o.A; const pct = total? Math.round(o.P/total*100) : 0;
         const tr = document.createElement('tr');
@@ -1693,7 +1975,7 @@
     })
 
     /* =====================
-       Fee Management
+       Fee Management (Admin only)
        ===================== */
     let editingFeeId = null;
     let selectedFeeForPayment = null;
@@ -1900,7 +2182,6 @@
 
       closeFeeModal();
       renderFeeTable();
-      refreshFeeStats();
     }
 
     function closeFeeModal() {
@@ -1999,7 +2280,6 @@
       
       closePaymentModal();
       renderFeeTable();
-      refreshFeeStats();
       
       alert(`Payment of ₹${paymentAmount.toLocaleString()} recorded successfully!\nReceipt No: ${receiptNo}`);
     }
@@ -2016,27 +2296,6 @@
       db.set(store.payments, updatedPayments);
       
       renderFeeTable();
-      refreshFeeStats();
-    }
-
-    function refreshFeeStats() {
-      const fees = db.get(store.fees, []);
-      let totalAmount = 0;
-      let totalPaid = 0;
-      let pendingFees = 0;
-      let overdueFees = 0;
-      const today = new Date();
-      
-      fees.forEach(fee => {
-        totalAmount += fee.amount;
-        totalPaid += fee.paidAmount;
-        
-        if (fee.status !== 'Paid') {
-          pendingFees++;
-          const dueDate = new Date(fee.dueDate);
-          if (dueDate < today) overdueFees++;
-        }
-      });
     }
 
     function generateFeeReport() {
@@ -2445,7 +2704,7 @@
         // Refresh views after a delay
         setTimeout(() => {
           renderStudentFeeView();
-          if (auth.current.role === 'teacher') {
+          if (auth.current.role === 'admin') {
             renderFeeTable();
           }
         }, 1000);
@@ -2592,31 +2851,49 @@
        ===================== */
     function enterDashboard(){
       hide(authPage); show(dash); show(navLogoutBtn);
-      const u = auth.current; userName.textContent = u.name; userRole.textContent = u.role;
-      if(u.role==='teacher'){
-        $('#navTeacherHome').classList.remove('hide');
+      const u = auth.current; 
+      userName.textContent = u.name; 
+      userRole.textContent = u.role;
+      
+      // Hide all navigation items first
+      $$('.nav .item').forEach(item => item.classList.add('hide'));
+      
+      if(u.role==='admin'){
+        // Show admin navigation
+        $('#navAdminHome').classList.remove('hide');
         $('#navManageStudents').classList.remove('hide');
-        $('#navTakeAttendance').classList.remove('hide');
+        $('#navManageTeachers').classList.remove('hide');
         $('#navFeeMonitoring').classList.remove('hide');
-        $('#navReports').classList.remove('hide');
-        $('#navStudentHome').classList.add('hide');
-        $('#navStudentFees').classList.add('hide');
-        setActive('teacherHome'); refreshTeacherStats(); listStudents(); refreshClassFilter();
-        attDate.value = todayISO(); renderAttendanceTable();
-        $('#repMonth').value = monISO(); renderReports();
+        $('#navAdminReports').classList.remove('hide');
+        setActive('adminHome'); 
+        refreshAdminStats(); 
+        listStudents(); 
+        listTeachers();
+        refreshClassFilter();
         populateStudentDropdown();
         populateFeeClassFilter();
         renderFeeTable();
-        refreshFeeStats();
-      }else{
-        $('#navTeacherHome').classList.add('hide');
-        $('#navManageStudents').classList.add('hide');
-        $('#navTakeAttendance').classList.add('hide');
-        $('#navFeeMonitoring').classList.add('hide');
-        $('#navReports').classList.add('hide');
+        $('#repMonth').value = monISO(); 
+        renderAdminReports();
+      } else if(u.role==='teacher'){
+        // Show teacher navigation
+        $('#navTeacherHome').classList.remove('hide');
+        $('#navTakeAttendance').classList.remove('hide');
+        $('#navTeacherReports').classList.remove('hide');
+        setActive('teacherHome'); 
+        refreshTeacherStats(); 
+        refreshClassFilter();
+        attDate.value = todayISO(); 
+        renderAttendanceTable();
+        $('#teacherRepMonth').value = monISO(); 
+        renderTeacherReports();
+      } else if(u.role==='student'){
+        // Show student navigation
         $('#navStudentHome').classList.remove('hide');
         $('#navStudentFees').classList.remove('hide');
-        setActive('studentHome'); $('#stuMonth').value = monISO(); renderStudentHome();
+        setActive('studentHome'); 
+        $('#stuMonth').value = monISO(); 
+        renderStudentHome();
         renderStudentFeeView();
       }
     }
@@ -2646,21 +2923,23 @@
     nav.addEventListener('click', (e)=>{
       const it = e.target.closest('.item'); if(!it) return;
       const target = it.dataset.target; setActive(target);
-      if(target==='reports') renderReports();
+      if(target==='adminReports') renderAdminReports();
       if(target==='takeAttendance') renderAttendanceTable();
+      if(target==='teacherReports') renderTeacherReports();
       if(target==='studentHome') renderStudentHome();
       if(target==='feeMonitoring') {
         populateStudentDropdown();
         populateFeeClassFilter();
         renderFeeTable();
-        refreshFeeStats();
       }
       if(target==='studentFees') renderStudentFeeView();
+      if(target==='manageStudents') listStudents();
+      if(target==='manageTeachers') listTeachers();
     })
 
     // Quick actions
     $('#quickTakeBtn').addEventListener('click', ()=>{ setActive('takeAttendance'); renderAttendanceTable() });
-    $('#seedBtn').addEventListener('click', ()=>{ if(confirm('Reset demo data?')){ seedDemo(); refreshLandingStats(); refreshTeacherStats(); listStudents(); renderAttendanceTable(); renderReports(); renderStudentFeeView(); } })
+    $('#seedBtn').addEventListener('click', ()=>{ if(confirm('Reset demo data?')){ seedDemo(); refreshLandingStats(); refreshAdminStats(); refreshTeacherStats(); listStudents(); listTeachers(); renderAttendanceTable(); renderAdminReports(); renderTeacherReports(); renderStudentFeeView(); } })
 
     // Fee Event Listeners
     $('#addFeeRecordBtn').addEventListener('click', () => openFeeModal());
@@ -2687,7 +2966,7 @@
     $('#cancelPaymentBtn').addEventListener('click', closePaymentModal);
     $('#savePaymentBtn').addEventListener('click', recordPayment);
 
-    // Fee table actions (for teacher)
+    // Fee table actions (for admin)
     $('#feeTbody').addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -2789,6 +3068,13 @@
     $('#printReceiptBtn').addEventListener('click', printReceipt);
     $('#closeSuccessBtn').addEventListener('click', closePaymentProcessing);
 
+    // Admin Reports month change
+    $('#repMonth').addEventListener('change', renderAdminReports);
+    
+    // Teacher Reports month and class change
+    $('#teacherRepMonth').addEventListener('change', renderTeacherReports);
+    $('#teacherClassFilter').addEventListener('change', renderTeacherReports);
+
     /* =====================
        Bootstrap
        ===================== */
@@ -2800,8 +3086,11 @@
     const roleRadios = document.querySelectorAll('input[name="role"]');
     function updatePlaceholders() {
       const selectedRole = document.querySelector('input[name="role"]:checked').value;
-      if (selectedRole === 'teacher') {
-        loginId.placeholder = 'Jitendra Kumar';
+      if (selectedRole === 'admin') {
+        loginId.placeholder = 'admin@ugiverse.com';
+        loginPass.placeholder = 'admin123';
+      } else if (selectedRole === 'teacher') {
+        loginId.placeholder = 'jitendra@ugiverse.com';
         loginPass.placeholder = 'teacher123';
       } else if (selectedRole === 'student') {
         loginId.placeholder = 'mrmalviyaji@gmail.com';
