@@ -1502,29 +1502,72 @@
     }
 
     /* =====================
-       Auth
-       ===================== */
-    const auth = {
-      current: null,
-      login(idOrEmail, password, role){
-        if(role === 'admin'){
-          const admins = db.get(store.admins, []);
-          const u = admins.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
-          if(u){ this.current = u; sessionStorage.setItem('sl_user', JSON.stringify(u)); return {ok:true, user:u} }
-        } else if(role === 'teacher'){
-          const teachers = db.get(store.teachers, []);
-          const u = teachers.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
-          if(u){ this.current = u; sessionStorage.setItem('sl_user', JSON.stringify(u)); return {ok:true, user:u} }
-        } else if(role === 'student'){
-          const students = db.get(store.students, []);
-          const s = students.find(s=> (s.id===idOrEmail || s.email?.toLowerCase()===idOrEmail.toLowerCase()) && s.password===password);
-          if(s){ this.current = {...s, role:'student'}; sessionStorage.setItem('sl_user', JSON.stringify(this.current)); return {ok:true, user:this.current} }
-        }
-        return {ok:false, msg:'Invalid credentials'}
-      },
-      logout(){ this.current=null; sessionStorage.removeItem('sl_user') },
-      load(){ try{ this.current = JSON.parse(sessionStorage.getItem('sl_user')); return this.current }catch{ return null } }
+   Auth -   ===================== */
+const auth = {
+  current: null,
+  login(idOrEmail, password, role){
+    // Normalize input - this prevents case sensitivity issues and trailing spaces
+    const normalizedInput = idOrEmail.toLowerCase().trim();
+    const normalizedPassword = password.trim();
+    
+    if(role === 'admin'){
+      const admins = db.get(store.admins, []);
+      const u = admins.find(u => {
+        const emailMatch = u.email && u.email.toLowerCase() === normalizedInput;
+        const idMatch = u.id && u.id.toLowerCase() === normalizedInput;
+        const passwordMatch = u.password === normalizedPassword;
+        return (emailMatch || idMatch) && passwordMatch;
+      });
+      if(u){ 
+        this.current = u; 
+        sessionStorage.setItem('sl_user', JSON.stringify(u)); 
+        return {ok:true, user:u};
+      }
+    } else if(role === 'teacher'){
+      const teachers = db.get(store.teachers, []);
+      const u = teachers.find(u => {
+        const emailMatch = u.email && u.email.toLowerCase() === normalizedInput;
+        const idMatch = u.id && u.id.toLowerCase() === normalizedInput;
+        const passwordMatch = u.password === normalizedPassword;
+        return (emailMatch || idMatch) && passwordMatch;
+      });
+      if(u){ 
+        this.current = u; 
+        sessionStorage.setItem('sl_user', JSON.stringify(u)); 
+        return {ok:true, user:u};
+      }
+    } else if(role === 'student'){
+      const students = db.get(store.students, []);
+      const s = students.find(s => {
+        const emailMatch = s.email && s.email.toLowerCase() === normalizedInput;
+        const idMatch = s.id && s.id.toLowerCase() === normalizedInput;
+        const rollMatch = s.roll && s.roll.toLowerCase() === normalizedInput;
+        const passwordMatch = s.password === normalizedPassword;
+        return (emailMatch || idMatch || rollMatch) && passwordMatch;
+      });
+      if(s){ 
+        this.current = {...s, role:'student'}; 
+        sessionStorage.setItem('sl_user', JSON.stringify(this.current)); 
+        return {ok:true, user:this.current};
+      }
     }
+    
+    // IMPORTANT: Always return an explicit failure object
+    return {ok:false, msg:'Invalid credentials'};
+  },
+  logout(){ 
+    this.current=null; 
+    sessionStorage.removeItem('sl_user');
+  },
+  load(){ 
+    try{ 
+      this.current = JSON.parse(sessionStorage.getItem('sl_user')); 
+      return this.current;
+    } catch{ 
+      return null;
+    }
+  }
+}
 
     /* =====================
        DOM Handlers
