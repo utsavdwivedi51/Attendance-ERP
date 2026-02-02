@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance ERP – Student & Teacher Portal</title>
+  <title>Attendance ERP - Student & Teacher Portal</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -499,6 +499,7 @@
           <div class="field">
             <label>Login as</label>
             <div class="row">
+              <label class="row"><input type="radio" name="role" value="admin" checked> Admin</label>
               <label class="row"><input type="radio" name="role" value="teacher" checked> &nbsp;Teacher</label>
               <label class="row"><input type="radio" name="role" value="student"> &nbsp;Student</label>
             </div>
@@ -834,27 +835,21 @@
             <label>Payment Method</label>
             <div class="payment-methods">
               <div class="payment-method" data-method="cash">
-                <div>💵</div>
                 <div>Cash</div>
               </div>
               <div class="payment-method" data-method="card">
-                <div>💳</div>
                 <div>Card</div>
               </div>
               <div class="payment-method" data-method="online">
-                <div>🌐</div>
                 <div>Online</div>
               </div>
               <div class="payment-method" data-method="upi">
-                <div>📱</div>
                 <div>UPI</div>
               </div>
               <div class="payment-method" data-method="cheque">
-                <div>📄</div>
                 <div>Cheque</div>
               </div>
               <div class="payment-method" data-method="bank_transfer">
-                <div>🏦</div>
                 <div>Bank Transfer</div>
               </div>
             </div>
@@ -1054,19 +1049,19 @@
           <label>Choose Payment Method</label>
           <div class="payment-methods" style="margin-bottom:20px">
             <div class="payment-method" data-method="card">
-              <div style="font-size:32px; margin-bottom:8px">💳</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Card</div>
             </div>
             <div class="payment-method" data-method="online">
-              <div style="font-size:32px; margin-bottom:8px">🌐</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Online</div>
             </div>
             <div class="payment-method" data-method="upi">
-              <div style="font-size:32px; margin-bottom:8px">📱</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>UPI</div>
             </div>
             <div class="payment-method" data-method="bank_transfer">
-              <div style="font-size:32px; margin-bottom:8px">🏦</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Bank Transfer</div>
             </div>
           </div>
@@ -1219,6 +1214,11 @@
     }
 
     function seedDemo(){
+      // Admin
+      const users = [
+       { id:'A001', role:'admin', email:'admin', password:'admin123', name:'System Admin' }
+      ];
+      
       // Teacher
       const users = [
         { id: 'T001', role:'teacher', email:'Jitendra Kumar', password:'teacher123', name:'Admin Jitendra Kumar' },
@@ -1368,21 +1368,38 @@
        ===================== */
     const auth = {
       current: null,
-      login(idOrEmail, password, role){
-        const users = db.get(store.users, []);
-        const students = db.get(store.students, []);
-        if(role === 'teacher'){
-          const u = users.find(u=> (u.email?.toLowerCase()===idOrEmail.toLowerCase()) && u.password===password);
-          if(u){ this.current = u; sessionStorage.setItem('sl_user', JSON.stringify(u)); return {ok:true, user:u} }
-        }else{
-          const s = students.find(s=> (s.id===idOrEmail || s.email?.toLowerCase()===idOrEmail.toLowerCase()) && s.password===password);
-          if(s){ this.current = {...s, role:'student'}; sessionStorage.setItem('sl_user', JSON.stringify(this.current)); return {ok:true, user:this.current} }
-        }
-        return {ok:false, msg:'Invalid credentials'}
-      },
-      logout(){ this.current=null; sessionStorage.removeItem('sl_user') },
-      load(){ try{ this.current = JSON.parse(sessionStorage.getItem('sl_user')); return this.current }catch{ return null } }
+    
+    login(id, password, role) {
+  const users = db.get(store.users, []);
+  const students = db.get(store.students, []);
+
+  if (role === 'admin' || role === 'teacher') {
+    const u = users.find(u =>
+      u.role === role &&
+      u.email === id &&
+      u.password === password
+    );
+    if (u) {
+      this.current = u;
+      sessionStorage.setItem('sl_user', JSON.stringify(u));
+      return { ok: true };
     }
+  }
+
+  if (role === 'student') {
+    const s = students.find(s =>
+      (s.id === id || s.email === id) &&
+      s.password === password
+    );
+    if (s) {
+      this.current = { ...s, role: 'student' };
+      sessionStorage.setItem('sl_user', JSON.stringify(this.current));
+      return { ok: true };
+    }
+  }
+
+  return { ok: false };
+}
 
     /* =====================
        DOM Handlers
@@ -1541,6 +1558,10 @@
     /* =====================
        Take Attendance
        ===================== */
+       if (auth.current.role !== 'teacher') {
+  alert('Access denied');
+  return;
+}
     const attTbody = $('#attTbody');
     const attDate = $('#attDate');
     const attSearch = $('#attSearch');
@@ -1697,7 +1718,10 @@
        ===================== */
     let editingFeeId = null;
     let selectedFeeForPayment = null;
-
+    if (auth.current.role !== 'admin') {
+     alert('Admin only');
+     return;
+     }
     function populateStudentDropdown() {
       const students = db.get(store.students, []);
       const select = $('#feeStudentSelect');
@@ -2196,12 +2220,12 @@
         const fee = fees.find(f => f.id === payment.feeId);
         let paymentMethodText = payment.paymentMode;
         switch(payment.paymentMode) {
-          case 'cash': paymentMethodText = '💵 Cash'; break;
-          case 'card': paymentMethodText = '💳 Card'; break;
-          case 'online': paymentMethodText = '🌐 Online'; break;
-          case 'upi': paymentMethodText = '📱 UPI'; break;
-          case 'cheque': paymentMethodText = '📄 Cheque'; break;
-          case 'bank_transfer': paymentMethodText = '🏦 Bank Transfer'; break;
+          case 'cash': paymentMethodText = 'Cash'; break;
+          case 'card': paymentMethodText = 'Card'; break;
+          case 'online': paymentMethodText = 'Online'; break;
+          case 'upi': paymentMethodText = 'UPI'; break;
+          case 'cheque': paymentMethodText = 'Cheque'; break;
+          case 'bank_transfer': paymentMethodText = 'Bank Transfer'; break;
         }
         
         const tr = document.createElement('tr');
@@ -2593,32 +2617,46 @@
     function enterDashboard(){
       hide(authPage); show(dash); show(navLogoutBtn);
       const u = auth.current; userName.textContent = u.name; userRole.textContent = u.role;
-      if(u.role==='teacher'){
-        $('#navTeacherHome').classList.remove('hide');
-        $('#navManageStudents').classList.remove('hide');
-        $('#navTakeAttendance').classList.remove('hide');
-        $('#navFeeMonitoring').classList.remove('hide');
-        $('#navReports').classList.remove('hide');
-        $('#navStudentHome').classList.add('hide');
-        $('#navStudentFees').classList.add('hide');
-        setActive('teacherHome'); refreshTeacherStats(); listStudents(); refreshClassFilter();
-        attDate.value = todayISO(); renderAttendanceTable();
-        $('#repMonth').value = monISO(); renderReports();
-        populateStudentDropdown();
-        populateFeeClassFilter();
-        renderFeeTable();
-        refreshFeeStats();
-      }else{
-        $('#navTeacherHome').classList.add('hide');
-        $('#navManageStudents').classList.add('hide');
-        $('#navTakeAttendance').classList.add('hide');
-        $('#navFeeMonitoring').classList.add('hide');
-        $('#navReports').classList.add('hide');
-        $('#navStudentHome').classList.remove('hide');
-        $('#navStudentFees').classList.remove('hide');
-        setActive('studentHome'); $('#stuMonth').value = monISO(); renderStudentHome();
-        renderStudentFeeView();
-      }
+      if (u.role === 'admin') {
+
+  show($('#navManageStudents'));
+  show($('#navFeeMonitoring'));
+
+  hide($('#navTakeAttendance'));
+  hide($('#navReports'));
+  hide($('#navStudentHome'));
+  hide($('#navStudentFees'));
+
+  setActive('manageStudents');
+
+}
+
+else if (u.role === 'teacher') {
+
+  show($('#navTakeAttendance'));
+  show($('#navReports'));
+
+  hide($('#navManageStudents'));
+  hide($('#navFeeMonitoring'));
+  hide($('#navStudentHome'));
+  hide($('#navStudentFees'));
+
+  setActive('takeAttendance');
+
+}
+
+else if (u.role === 'student') {
+
+  show($('#navStudentHome'));
+  show($('#navStudentFees'));
+
+  hide($('#navManageStudents'));
+  hide($('#navTakeAttendance'));
+  hide($('#navFeeMonitoring'));
+  hide($('#navReports'));
+
+  setActive('studentHome');
+}
     }
 
     function leaveDashboard(){
@@ -2821,4 +2859,4 @@
     }
   </script>
 </body>
-</html>
+</html> 
