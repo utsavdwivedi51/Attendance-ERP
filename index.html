@@ -898,27 +898,27 @@
             <label>Payment Method</label>
             <div class="payment-methods">
               <div class="payment-method" data-method="cash">
-                
+                <div>💵</div>
                 <div>Cash</div>
               </div>
               <div class="payment-method" data-method="card">
-                
+                <div>💳</div>
                 <div>Card</div>
               </div>
               <div class="payment-method" data-method="online">
-               
+                <div>🌐</div>
                 <div>Online</div>
               </div>
               <div class="payment-method" data-method="upi">
-                
+                <div>📱</div>
                 <div>UPI</div>
               </div>
               <div class="payment-method" data-method="cheque">
-              
+                <div>📄</div>
                 <div>Cheque</div>
               </div>
               <div class="payment-method" data-method="bank_transfer">
-               
+                <div>🏦</div>
                 <div>Bank Transfer</div>
               </div>
             </div>
@@ -1183,19 +1183,19 @@
           <label>Choose Payment Method</label>
           <div class="payment-methods" style="margin-bottom:20px">
             <div class="payment-method" data-method="card">
-              <div style="font-size:32px; margin-bottom:8px"></div>
+              <div style="font-size:32px; margin-bottom:8px">💳</div>
               <div>Card</div>
             </div>
             <div class="payment-method" data-method="online">
-              <div style="font-size:32px; margin-bottom:8px"></div>
+              <div style="font-size:32px; margin-bottom:8px">🌐</div>
               <div>Online</div>
             </div>
             <div class="payment-method" data-method="upi">
-              <div style="font-size:32px; margin-bottom:8px"></div>
+              <div style="font-size:32px; margin-bottom:8px">📱</div>
               <div>UPI</div>
             </div>
             <div class="payment-method" data-method="bank_transfer">
-              <div style="font-size:32px; margin-bottom:8px"></div>
+              <div style="font-size:32px; margin-bottom:8px">🏦</div>
               <div>Bank Transfer</div>
             </div>
           </div>
@@ -1491,6 +1491,12 @@
       db.set(store.fees, fees);
       db.set(store.payments, payments);
       setSeeded(true);
+      
+      // Debug: Check what's stored
+      console.log('Demo data seeded successfully');
+      console.log('Admins:', admins);
+      console.log('Teachers:', teachers);
+      console.log('Students:', students);
     }
 
     function ensureSeed(){ 
@@ -1502,72 +1508,77 @@
     }
 
     /* =====================
-   Auth -   ===================== */
-const auth = {
-  current: null,
-  login(idOrEmail, password, role){
-    // Normalize input - this prevents case sensitivity issues and trailing spaces
-    const normalizedInput = idOrEmail.toLowerCase().trim();
-    const normalizedPassword = password.trim();
-    
-    if(role === 'admin'){
-      const admins = db.get(store.admins, []);
-      const u = admins.find(u => {
-        const emailMatch = u.email && u.email.toLowerCase() === normalizedInput;
-        const idMatch = u.id && u.id.toLowerCase() === normalizedInput;
-        const passwordMatch = u.password === normalizedPassword;
-        return (emailMatch || idMatch) && passwordMatch;
-      });
-      if(u){ 
-        this.current = u; 
-        sessionStorage.setItem('sl_user', JSON.stringify(u)); 
-        return {ok:true, user:u};
-      }
-    } else if(role === 'teacher'){
-      const teachers = db.get(store.teachers, []);
-      const u = teachers.find(u => {
-        const emailMatch = u.email && u.email.toLowerCase() === normalizedInput;
-        const idMatch = u.id && u.id.toLowerCase() === normalizedInput;
-        const passwordMatch = u.password === normalizedPassword;
-        return (emailMatch || idMatch) && passwordMatch;
-      });
-      if(u){ 
-        this.current = u; 
-        sessionStorage.setItem('sl_user', JSON.stringify(u)); 
-        return {ok:true, user:u};
-      }
-    } else if(role === 'student'){
-      const students = db.get(store.students, []);
-      const s = students.find(s => {
-        const emailMatch = s.email && s.email.toLowerCase() === normalizedInput;
-        const idMatch = s.id && s.id.toLowerCase() === normalizedInput;
-        const rollMatch = s.roll && s.roll.toLowerCase() === normalizedInput;
-        const passwordMatch = s.password === normalizedPassword;
-        return (emailMatch || idMatch || rollMatch) && passwordMatch;
-      });
-      if(s){ 
-        this.current = {...s, role:'student'}; 
-        sessionStorage.setItem('sl_user', JSON.stringify(this.current)); 
-        return {ok:true, user:this.current};
+       Auth - Fixed Login Issue
+       ===================== */
+    const auth = {
+      current: null,
+      login(idOrEmail, password, role){
+        console.log(`Login attempt: Role=${role}, ID/Email=${idOrEmail}, Password=${password}`);
+        
+        // For Admin
+        if(role === 'admin'){
+          const admins = db.get(store.admins, []);
+          console.log('Available admins:', admins);
+          const admin = admins.find(a => 
+            (a.email === idOrEmail || a.id === idOrEmail) && 
+            a.password === password
+          );
+          if(admin){ 
+            console.log('Admin login successful:', admin);
+            this.current = admin; 
+            sessionStorage.setItem('sl_user', JSON.stringify(admin)); 
+            return {ok:true, user:admin};
+          }
+        } 
+        // For Teacher
+        else if(role === 'teacher'){
+          const teachers = db.get(store.teachers, []);
+          console.log('Available teachers:', teachers);
+          const teacher = teachers.find(t => 
+            (t.email === idOrEmail || t.id === idOrEmail) && 
+            t.password === password
+          );
+          if(teacher){ 
+            console.log('Teacher login successful:', teacher);
+            this.current = teacher; 
+            sessionStorage.setItem('sl_user', JSON.stringify(teacher)); 
+            return {ok:true, user:teacher};
+          }
+        } 
+        // For Student
+        else if(role === 'student'){
+          const students = db.get(store.students, []);
+          console.log('Available students:', students);
+          const student = students.find(s => 
+            (s.email === idOrEmail || s.id === idOrEmail || s.roll === idOrEmail) && 
+            s.password === password
+          );
+          if(student){ 
+            console.log('Student login successful:', student);
+            this.current = {...student, role:'student'}; 
+            sessionStorage.setItem('sl_user', JSON.stringify(this.current)); 
+            return {ok:true, user:this.current};
+          }
+        }
+        
+        console.log('Login failed for all roles');
+        return {ok:false, msg:'Invalid credentials'};
+      },
+      logout(){ 
+        this.current=null; 
+        sessionStorage.removeItem('sl_user');
+      },
+      load(){ 
+        try{ 
+          const user = JSON.parse(sessionStorage.getItem('sl_user')); 
+          this.current = user;
+          return user;
+        } catch(e){ 
+          console.error('Error loading user:', e);
+          return null;
+        }
       }
     }
-    
-    // IMPORTANT: Always return an explicit failure object
-    return {ok:false, msg:'Invalid credentials'};
-  },
-  logout(){ 
-    this.current=null; 
-    sessionStorage.removeItem('sl_user');
-  },
-  load(){ 
-    try{ 
-      this.current = JSON.parse(sessionStorage.getItem('sl_user')); 
-      return this.current;
-    } catch{ 
-      return null;
-    }
-  }
-}
 
     /* =====================
        DOM Handlers
@@ -2947,10 +2958,25 @@ const auth = {
 
     loginBtn.addEventListener('click', ()=>{
       const role = document.querySelector('input[name="role"]:checked').value;
-      const id = loginId.value.trim(); const pw = loginPass.value.trim();
-      if(!id || !pw){ loginMsg.textContent = 'Please fill all fields.'; return }
+      const id = loginId.value.trim(); 
+      const pw = loginPass.value.trim();
+      console.log(`Login attempt: Role=${role}, ID=${id}, Password=${pw}`);
+      
+      if(!id || !pw){ 
+        loginMsg.textContent = 'Please fill all fields.'; 
+        return;
+      }
+      
       const res = auth.login(id, pw, role);
-      if(res.ok){ loginMsg.textContent=''; enterDashboard() } else { loginMsg.textContent = 'Invalid '+role+' credentials.' }
+      if(res.ok){ 
+        loginMsg.textContent=''; 
+        enterDashboard();
+      } else { 
+        loginMsg.textContent = 'Invalid '+role+' credentials. Try: ' + 
+          (role === 'admin' ? 'admin@ugiverse.com / admin123' : 
+           role === 'teacher' ? 'jitendra@ugiverse.com / teacher123' : 
+           'mrmalviyaji@gmail.com / om@123');
+      }
     })
 
     togglePass.addEventListener('click', ()=>{
@@ -2982,7 +3008,20 @@ const auth = {
 
     // Quick actions
     $('#quickTakeBtn').addEventListener('click', ()=>{ setActive('takeAttendance'); renderAttendanceTable() });
-    $('#seedBtn').addEventListener('click', ()=>{ if(confirm('Reset demo data?')){ seedDemo(); refreshLandingStats(); refreshAdminStats(); refreshTeacherStats(); listStudents(); listTeachers(); renderAttendanceTable(); renderAdminReports(); renderTeacherReports(); renderStudentFeeView(); } })
+    $('#seedBtn').addEventListener('click', ()=>{ 
+      if(confirm('Reset demo data?')){ 
+        seedDemo(); 
+        refreshLandingStats(); 
+        refreshAdminStats(); 
+        refreshTeacherStats(); 
+        listStudents(); 
+        listTeachers(); 
+        renderAttendanceTable(); 
+        renderAdminReports(); 
+        renderTeacherReports(); 
+        renderStudentFeeView(); 
+      } 
+    })
 
     // Fee Event Listeners
     $('#addFeeRecordBtn').addEventListener('click', () => openFeeModal());
@@ -3130,13 +3169,13 @@ const auth = {
     function updatePlaceholders() {
       const selectedRole = document.querySelector('input[name="role"]:checked').value;
       if (selectedRole === 'admin') {
-        loginId.placeholder = 'admin@ugiverse.com';
+        loginId.placeholder = 'admin@ugiverse.com or A001';
         loginPass.placeholder = 'admin123';
       } else if (selectedRole === 'teacher') {
-        loginId.placeholder = 'jitendra@ugiverse.com';
+        loginId.placeholder = 'jitendra@ugiverse.com or T001';
         loginPass.placeholder = 'teacher123';
       } else if (selectedRole === 'student') {
-        loginId.placeholder = 'mrmalviyaji@gmail.com';
+        loginId.placeholder = 'mrmalviyaji@gmail.com or 176 or 2204280100176';
         loginPass.placeholder = 'om@123';
       }
     }
@@ -3145,10 +3184,13 @@ const auth = {
     });
     updatePlaceholders();
     
+    // Check for existing session
     const existing = auth.load(); 
     if(existing){ 
+      console.log('Found existing session:', existing);
       enterDashboard(); 
     } else { 
+      console.log('No existing session found');
       leaveDashboard(); 
     }
   </script>
