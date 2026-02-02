@@ -898,27 +898,27 @@
             <label>Payment Method</label>
             <div class="payment-methods">
               <div class="payment-method" data-method="cash">
-                <div>💵</div>
+                <div></div>
                 <div>Cash</div>
               </div>
               <div class="payment-method" data-method="card">
-                <div>💳</div>
+                <div></div>
                 <div>Card</div>
               </div>
               <div class="payment-method" data-method="online">
-                <div>🌐</div>
+                <div></div>
                 <div>Online</div>
               </div>
               <div class="payment-method" data-method="upi">
-                <div>📱</div>
+                <div></div>
                 <div>UPI</div>
               </div>
               <div class="payment-method" data-method="cheque">
-                <div>📄</div>
+                <div></div>
                 <div>Cheque</div>
               </div>
               <div class="payment-method" data-method="bank_transfer">
-                <div>🏦</div>
+                <div></div>
                 <div>Bank Transfer</div>
               </div>
             </div>
@@ -1183,19 +1183,19 @@
           <label>Choose Payment Method</label>
           <div class="payment-methods" style="margin-bottom:20px">
             <div class="payment-method" data-method="card">
-              <div style="font-size:32px; margin-bottom:8px">💳</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Card</div>
             </div>
             <div class="payment-method" data-method="online">
-              <div style="font-size:32px; margin-bottom:8px">🌐</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Online</div>
             </div>
             <div class="payment-method" data-method="upi">
-              <div style="font-size:32px; margin-bottom:8px">📱</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>UPI</div>
             </div>
             <div class="payment-method" data-method="bank_transfer">
-              <div style="font-size:32px; margin-bottom:8px">🏦</div>
+              <div style="font-size:32px; margin-bottom:8px"></div>
               <div>Bank Transfer</div>
             </div>
           </div>
@@ -1350,7 +1350,7 @@
       if (!db.get(store.teachers)) db.set(store.teachers, []);
     }
 
-    function seedDemo(){
+    /* function seedDemo(){
       // Admin
       const admins = [
         { id: 'A001', role:'admin', email:'admin@ugiverse.com', password:'admin123', name:'Admin User' }
@@ -1506,6 +1506,120 @@
         initFeeStores();
       }
     }
+
+    <!-- ... (rest of the HTML remains the same) ... -->
+
+<script>
+  // ... (rest of the script remains the same until seedDemo) ...
+*/
+  function seedDemo(){
+    // Admin
+    const admins = [
+      { id: 'A001', role:'admin', email:'admin@ugiverse.com', password:'admin123', name:'Admin User' }
+    ];
+
+    // Teachers (IDs now match 'T' + empId)
+    const teachers = [
+      { id: 'TEMP001', role:'teacher', email:'jitendra@ugiverse.com', password:'teacher123', name:'Jitendra Kumar', department:'Computer Science', empId:'EMP001' },
+      { id: 'TEMP002', role:'teacher', email:'naman@ugiverse.com', password:'teacher123', name:'Naman Jaiswal', department:'Mathematics', empId:'EMP002' },
+      { id: 'TEMP003', role:'teacher', email:'jyoti@ugiverse.com', password:'teacher123', name:'Jyoti Srivastava', department:'Physics', empId:'EMP003' },
+      { id: 'TEMP004', role:'teacher', email:'devendra@ugiverse.com', password:'teacher123', name:'Devendra Awasthi', department:'Chemistry', empId:'EMP004' }
+    ];
+
+    // Students (IDs now match 'S' + roll)
+    const students = [
+      { id:'S2204280100176', name:'Om Malviya', roll:'2204280100176', class:'CS-7A', email:'mrmalviyaji@gmail.com', password:'om@123' },
+      { id:'S2204280100169', name:'Shristi Tripathi', roll:'2204280100169', class:'CS-7A', email:'shristi66@gmail.com', password:'shristi@123' },
+      { id:'S2204280100150', name:'Raj Dwivedi', roll:'2204280100150', class:'CS-7B', email:'rajdwivedi@gmail.com', password:'raj@123' },
+      { id:'S2204280100054', name:'Akshay Yadav', roll:'2204280100054', class:'CS-7B', email:'akshay12@gmail.com', password:'akshay@123' }
+    ];
+
+    // Attendance (studentId now uses corrected IDs)
+    const attendance = [];
+    const now = new Date();
+    for(let d=0; d<10; d++){
+      const date = new Date(now);
+      date.setDate(now.getDate()-d);
+      const iso = date.toISOString().slice(0,10);
+      for(const s of students){
+        const present = Math.random() > 0.15;
+        attendance.push({date: iso, studentId: s.id, status: present ? 'P' : 'A'});
+      }
+    }
+
+    // Fees (studentId now uses corrected IDs)
+    const fees = [
+      {
+        id: 'F001',
+        studentId: 'S2204280100176',
+        studentName: 'Om Malviya',
+        rollNo: '2204280100176',
+        className: 'CS-7A',
+        feeType: 'Tuition',
+        amount: 15000,
+        paidAmount: 15000,
+        dueDate: '2024-12-31',
+        academicYear: '2024-25',
+        semester: 'Semester 7',
+        status: 'Paid',
+        notes: 'Paid via online banking'
+      },
+      // ... (rest of fees updated similarly with corrected studentId) ...
+    ];
+
+    // Payments (studentId now uses corrected IDs)
+    const payments = [
+      {
+        id: 'P001',
+        feeId: 'F001',
+        studentId: 'S2204280100176',
+        amount: 15000,
+        date: '2024-11-15',
+        paymentMode: 'online',
+        receiptNo: 'RCPT001',
+        referenceNo: 'TXN0012345',
+        status: 'Completed'
+      },
+      // ... (rest of payments updated similarly) ...
+    ];
+
+    db.set(store.admins, admins);
+    db.set(store.teachers, teachers);
+    db.set(store.students, students);
+    db.set(store.attendance, attendance);
+    db.set(store.fees, fees);
+    db.set(store.payments, payments);
+    setSeeded(true);
+    
+    console.log('Demo data seeded successfully');
+    console.log('Admins:', admins);
+    console.log('Teachers:', teachers);
+    console.log('Students:', students);
+  }
+
+  // ... (rest of the script remains the same until the placeholder update) ...
+
+  // Dynamic placeholder script
+  const roleRadios = document.querySelectorAll('input[name="role"]');
+  function updatePlaceholders() {
+    const selectedRole = document.querySelector('input[name="role"]:checked').value;
+    if (selectedRole === 'admin') {
+      loginId.placeholder = 'admin@ugiverse.com or A001';
+      loginPass.placeholder = 'admin123';
+    } else if (selectedRole === 'teacher') {
+      loginId.placeholder = 'jitendra@ugiverse.com or TEMP001';
+      loginPass.placeholder = 'teacher123';
+    } else if (selectedRole === 'student') {
+      loginId.placeholder = 'mrmalviyaji@gmail.com or S2204280100176 or 2204280100176';
+      loginPass.placeholder = 'om@123';
+    }
+  }
+  roleRadios.forEach(radio => {
+    radio.addEventListener('change', updatePlaceholders);
+  });
+  updatePlaceholders();
+
+
 
     /* =====================
        Auth - Fixed Login Issue
