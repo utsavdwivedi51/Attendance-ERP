@@ -1,8 +1,7 @@
 # Attendance-ERP
 
-A lightweight web-based **Attendance & Employee Resource Planner (ERP)** application to manage staff attendance, monitor entry/exit, view summaries and reports — ideal for small organizations, inclusive of basic registration and management features.
+A lightweight web-based **Attendance & Employee Resource Planner (ERP)** application to manage staff attendance, monitor entry/exit, view summaries and reports - ideal for small organizations, inclusive of basic registration and management features.
 
-Repository: https://github.com/utsavdwivedi51/Attendance-ERP  
 Live Demo: https://utsavdwivedi51.github.io/Attendance-ERP/
 
 ## Overview
@@ -29,10 +28,3 @@ This project provides a simple interface for:
 | Styling       | Custom CSS               |
 | Logic         | app.js                   |
 | Tools         | Git, GitHub              |
-
-## Project Structure
-
-Attendance-ERP/
-│── index.html        # Main UI page
-│── styles.css        # Styles for layout and components
-│── app.js            # Core logic for attendance operations
