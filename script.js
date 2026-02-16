@@ -303,7 +303,7 @@ function refreshClassFilter(){
 addStudentBtn.addEventListener('click', ()=>{
   const name = sName.value.trim();
   const roll = sRoll.value.trim();
-  const cls = sClass.value.trim();
+  const cls = sClass.value; // Dropdown value, no trim needed
   const email = sEmail.value.trim();
   const pass = sPass.value.trim() || Math.random().toString(36).slice(2,8);
   if(!name || !roll || !cls){ alert('Name, Roll and Class are required'); return }
@@ -312,7 +312,7 @@ addStudentBtn.addEventListener('click', ()=>{
   if(students.some(x=>x.id===id)){ alert('A student with this roll already exists.'); return }
   students.push({ id, name, roll, class: cls, email, password: pass });
   db.set(store.students, students);
-  sName.value = sRoll.value = sClass.value = sEmail.value = sPass.value = '';
+  sName.value = ''; sRoll.value = ''; sClass.value = ''; sEmail.value = ''; sPass.value = '';
   listStudents(studentSearch.value);
   refreshClassFilter();
   refreshTeacherStats();
