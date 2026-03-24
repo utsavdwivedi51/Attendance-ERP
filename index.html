@@ -55,17 +55,34 @@
       </div>
 
       <div class="card pad">
-        <h2 style="margin:0 0 8px 0">Login</h2>
-        <div class="grid">
+        <h2 style="margin:0 0 16px 0">Login</h2>
+
+        <!-- Role selector buttons -->
+        <div class="role-selector">
+          <button class="role-btn" id="roleAdminBtn" data-role="admin" onclick="selectRole('admin')">
+            <span class="role-icon">🛡️</span>
+            <span class="role-label">Admin</span>
+            <span class="role-sub">Jitendra Kumar</span>
+          </button>
+          <button class="role-btn active" id="roleTeacherBtn" data-role="teacher" onclick="selectRole('teacher')">
+            <span class="role-icon">👨‍🏫</span>
+            <span class="role-label">Teacher</span>
+            <span class="role-sub">Staff login</span>
+          </button>
+          <button class="role-btn" id="roleStudentBtn" data-role="student" onclick="selectRole('student')">
+            <span class="role-icon">🧑‍🎓</span>
+            <span class="role-label">Student</span>
+            <span class="role-sub">Student login</span>
+          </button>
+        </div>
+
+        <!-- Hidden radio inputs kept for JS compatibility -->
+        <input type="radio" name="role" value="teacher" id="radioTeacher" checked style="display:none">
+        <input type="radio" name="role" value="student" id="radioStudent" style="display:none">
+
+        <div class="grid" style="margin-top:16px">
           <div class="field">
-            <label>Login as</label>
-            <div class="row">
-              <label class="row"><input type="radio" name="role" value="teacher" checked> &nbsp;Teacher</label>
-              <label class="row"><input type="radio" name="role" value="student"> &nbsp;Student</label>
-            </div>
-          </div>
-          <div class="field">
-            <label>Email / ID</label>
+            <label id="loginIdLabel">Email / ID</label>
             <input class="input" id="loginId" placeholder="Jitendra Kumar" />
           </div>
           <div class="field">
@@ -74,12 +91,11 @@
               <input class="input" id="loginPass" type="password" placeholder="teacher123" style="flex:1" />
               <button class="btn small" id="togglePass" type="button">Show</button>
             </div>
-            <small style="color:var(--muted)"> <code></code>  <code></code></small>
           </div>
           <div class="row">
-            <button class="btn primary" id="loginBtn">Sign in</button>
-            <div class="right" id="loginMsg" style="color:var(--warning)"></div>
+            <button class="btn primary" id="loginBtn" style="width:100%">Sign in</button>
           </div>
+          <div id="loginMsg" style="color:var(--warning); text-align:center; min-height:18px; font-size:.9rem;"></div>
         </div>
       </div>
     </div>
@@ -289,7 +305,6 @@
                 <option value="Lab">Lab Fee</option>
                 <option value="Exam">Exam Fee</option>
                 <option value="Hostel">Hostel Fee</option>
-                <option value="Fine">Fine</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -499,8 +514,6 @@
             <input class="input" id="teacherSearch" placeholder="Search by name or email" />
           </div>
         </div>
-
-       
 
         <div class="grid cols-3" style="margin-top:12px">
           <div class="field">
