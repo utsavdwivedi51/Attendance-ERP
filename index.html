@@ -93,12 +93,17 @@
         <div class="pill" id="userRole">teacher</div>
       </div>
       <div class="nav" id="nav">
+        <!-- Teacher / Admin shared nav items -->
         <div class="item active" data-target="teacherHome" id="navTeacherHome">Overview</div>
         <div class="item" data-target="manageStudents" id="navManageStudents">Students</div>
         <div class="item" data-target="takeAttendance" id="navTakeAttendance">Take Attendance</div>
         <div class="item" data-target="feeMonitoring" id="navFeeMonitoring">Fee Monitoring</div>
         <div class="item" data-target="reports" id="navReports">Reports</div>
 
+        <!-- Admin-only nav item -->
+        <div class="item hide" data-target="manageTeachers" id="navManageTeachers">Manage Teachers</div>
+
+        <!-- Student nav items -->
         <div class="item hide" data-target="studentHome" id="navStudentHome">My Attendance</div>
         <div class="item hide" data-target="studentFees" id="navStudentFees">My Fees</div>
       </div>
@@ -117,7 +122,7 @@
           </div>
           <div class="row">
             <button class="btn" id="seedBtn">Reset Demo Data</button>
-            <button class="btn primary" id="quickTakeBtn">Quick Take</button>
+            <button class="btn primary hide" id="quickTakeBtn">Quick Take</button>
           </div>
         </div>
         <div class="stats" style="margin-top:14px">
@@ -136,6 +141,13 @@
           <div class="stat">
             <div class="big" id="tStatRecords">0</div>
             <div>Total Records</div>
+          </div>
+        </div>
+        <!-- Admin extra stat row -->
+        <div class="stats hide" style="margin-top:12px" id="adminExtraStats">
+          <div class="stat">
+            <div class="big" id="tStatTeachers">0</div>
+            <div>Teachers</div>
           </div>
         </div>
       </div>
@@ -277,6 +289,7 @@
                 <option value="Lab">Lab Fee</option>
                 <option value="Exam">Exam Fee</option>
                 <option value="Hostel">Hostel Fee</option>
+                <option value="Fine">Fine</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -430,7 +443,7 @@
           </div>
           
           <div class="field">
-            <label>Transaction/Reference No (Optional)</label>
+            <label>Transaction/Reference No </label>
             <input class="input" id="paymentReference" placeholder="Enter transaction/reference number" />
           </div>
           
@@ -471,6 +484,55 @@
               </tr>
             </thead>
             <tbody id="repTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MANAGE TEACHERS (Admin only) -->
+      <div id="manageTeachers" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Manage Teachers</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Add, edit or remove teacher accounts.</p>
+          </div>
+          <div class="row">
+            <input class="input" id="teacherSearch" placeholder="Search by name or email" />
+          </div>
+        </div>
+
+       
+
+        <div class="grid cols-3" style="margin-top:12px">
+          <div class="field">
+            <label>Full Name</label>
+            <input class="input" id="tName" placeholder="Enter Teacher Name" />
+          </div>
+          <div class="field">
+            <label>Email / Login ID</label>
+            <input class="input" id="tEmail" placeholder="Enter email or login name" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input class="input" id="tPass" placeholder="Set a password" />
+          </div>
+          <div class="field" style="grid-column: span 3">
+            <button class="btn success" id="addTeacherBtn" style="width:fit-content">Add Teacher</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0; margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email / Login ID</th>
+                <th>ID</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teachersTbody"></tbody>
           </table>
         </div>
       </div>
