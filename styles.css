@@ -498,6 +498,69 @@ tbody tr:hover td {
   margin-bottom: 8px;
 }
 
+/* Role selector buttons on login */
+.role-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.role-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.role-btn:hover {
+  border-color: var(--primary);
+  background: rgba(59,130,246,0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.role-btn.active {
+  border-color: var(--primary);
+  background: rgba(59,130,246,0.08);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+}
+
+.role-btn[data-role="admin"].active {
+  border-color: #7c3aed;
+  background: rgba(124,58,237,0.08);
+  box-shadow: 0 4px 12px rgba(124,58,237,0.15);
+}
+
+.role-btn[data-role="student"].active {
+  border-color: var(--accent);
+  background: rgba(16,185,129,0.08);
+  box-shadow: 0 4px 12px rgba(16,185,129,0.15);
+}
+
+.role-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.role-label {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--text);
+}
+
+.role-sub {
+  font-size: .75rem;
+  color: var(--muted);
+}
+
 /* Responsive */
 @media (max-width: 1000px) {
   .auth {
