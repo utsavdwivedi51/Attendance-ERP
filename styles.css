@@ -321,6 +321,13 @@ tbody tr:hover td {
   border: 1px solid #6ee7b7;
 }
 
+/* Admin chip */
+.chip.admin {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+
 /* Bad text for overdue/negative amounts */
 .bad {
   color: #ef4444 !important;
@@ -436,6 +443,13 @@ tbody tr:hover td {
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.1);
   font-weight: 600;
+}
+
+/* Admin pill variant */
+.pill.admin-pill {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
+  border-color: #93c5fd;
 }
 
 /* Modal overlay */
