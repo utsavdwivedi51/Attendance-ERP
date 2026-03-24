@@ -1,3 +1,4 @@
+
 /* =====================
    Utilities & Storage
    ===================== */
@@ -21,7 +22,7 @@ const store = {
   payments: 'sl_payments'
 };
 
-// The single admin ID - Jitendra Kumar (T001)
+// The single admin ID — Jitendra Kumar (T001)
 const ADMIN_ID = 'T001';
 
 function isAdmin(user){
@@ -225,7 +226,7 @@ const nav = $('#nav');
 
 const todayDate = $('#todayDate');
 
-// Sections - includes manageTeachers
+// Sections — includes manageTeachers
 const sections = ['teacherHome','manageStudents','takeAttendance','feeMonitoring','reports','manageTeachers','studentHome','studentFees'];
 
 function show(el){ el.classList.remove('hide') }
@@ -1188,12 +1189,73 @@ function leaveDashboard(){
   show(authPage); hide(dash); hide(navLogoutBtn); refreshLandingStats(); loginPass.value='';
 }
 
+/* =====================
+   Role Selector (3 buttons)
+   ===================== */
+let selectedRole = 'teacher'; // default
+
+function selectRole(role) {
+  selectedRole = role;
+  // Update active button
+  $$('.role-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.role === role));
+
+  // Sync hidden radio for legacy compat (admin treated as teacher login)
+  if (role === 'student') {
+    $('#radioStudent').checked = true;
+  } else {
+    $('#radioTeacher').checked = true;
+  }
+
+  // Update placeholders & pre-fill for admin
+  const idInput = $('#loginId');
+  const passInput = $('#loginPass');
+  const label = $('#loginIdLabel');
+
+  if (role === 'admin') {
+    label.textContent = 'Email / ID';
+    idInput.value = 'Jitendra Kumar';
+    passInput.value = 'teacher123';
+    idInput.placeholder = 'Jitendra Kumar';
+    passInput.placeholder = 'teacher123';
+  } else if (role === 'teacher') {
+    label.textContent = 'Email / ID';
+    idInput.value = '';
+    passInput.value = '';
+    idInput.placeholder = 'Naman Jaiswal';
+    passInput.placeholder = 'teacher123';
+  } else {
+    label.textContent = 'Email / ID';
+    idInput.value = '';
+    passInput.value = '';
+    idInput.placeholder = 'mrmalviyaji@gmail.com';
+    passInput.placeholder = 'om@123';
+  }
+  idInput.focus();
+  $('#loginMsg').textContent = '';
+}
+
+// Override login handler to use selectedRole
 loginBtn.addEventListener('click', ()=>{
-  const role = document.querySelector('input[name="role"]:checked').value;
-  const id = loginId.value.trim(); const pw = loginPass.value.trim();
+  const id = loginId.value.trim();
+  const pw = loginPass.value.trim();
   if(!id || !pw){ loginMsg.textContent = 'Please fill all fields.'; return }
-  const res = auth.login(id, pw, role);
-  if(res.ok){ loginMsg.textContent=''; enterDashboard() } else { loginMsg.textContent = 'Invalid '+role+' credentials.' }
+
+  // Admin: force teacher login and verify it's Jitendra Kumar's account
+  const loginRoleForAuth = selectedRole === 'student' ? 'student' : 'teacher';
+  const res = auth.login(id, pw, loginRoleForAuth);
+
+  if(res.ok){
+    // If "admin" button was selected, verify the user is actually the admin
+    if(selectedRole === 'admin' && !isAdmin(res.user)){
+      loginMsg.textContent = 'This account is not the Admin.';
+      auth.logout();
+      return;
+    }
+    loginMsg.textContent = '';
+    enterDashboard();
+  } else {
+    loginMsg.textContent = 'Invalid credentials.';
+  }
 })
 
 togglePass.addEventListener('click', ()=>{
@@ -1315,14 +1377,8 @@ ensureSeed();
 refreshLandingStats();
 todayDate.textContent = new Date().toLocaleDateString();
 
-const roleRadios = document.querySelectorAll('input[name="role"]');
-function updatePlaceholders() {
-  const selectedRole = document.querySelector('input[name="role"]:checked').value;
-  if (selectedRole === 'teacher') { loginId.placeholder = 'Jitendra Kumar'; loginPass.placeholder = 'teacher123'; }
-  else { loginId.placeholder = 'mrmalviyaji@gmail.com'; loginPass.placeholder = 'om@123'; }
-}
-roleRadios.forEach(radio => radio.addEventListener('change', updatePlaceholders));
-updatePlaceholders();
+// Init role selector to default (teacher)
+selectRole('teacher');
 
 const existing = auth.load(); 
 if(existing){ enterDashboard(); } else { leaveDashboard(); }
