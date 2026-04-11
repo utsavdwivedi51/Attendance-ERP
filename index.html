@@ -114,6 +114,7 @@
         <div class="item" data-target="manageStudents" id="navManageStudents">Students</div>
         <div class="item" data-target="takeAttendance" id="navTakeAttendance">Take Attendance</div>
         <div class="item" data-target="feeMonitoring" id="navFeeMonitoring">Fee Monitoring</div>
+        <div class="item" data-target="assignments" id="navAssignments">Assignments</div>
         <div class="item" data-target="reports" id="navReports">Reports</div>
 
         <!-- Admin-only nav item -->
@@ -122,6 +123,7 @@
         <!-- Student nav items -->
         <div class="item hide" data-target="studentHome" id="navStudentHome">My Attendance</div>
         <div class="item hide" data-target="studentFees" id="navStudentFees">My Fees</div>
+        <div class="item hide" data-target="studentAssignments" id="navStudentAssignments">Assignments</div>
       </div>
       <div class="row" style="margin-top:10px">
         <button class="btn small right" id="logoutBtn">Logout</button>
@@ -141,7 +143,7 @@
             <button class="btn primary hide" id="quickTakeBtn">Quick Take</button>
           </div>
         </div>
-        <div class="stats" style="margin-top:14px">
+        <div class="stats" style="margin-top:14px; grid-template-columns:repeat(5,minmax(0,1fr))">
           <div class="stat">
             <div class="big" id="tStatStudents">0</div>
             <div>Students</div>
@@ -158,12 +160,20 @@
             <div class="big" id="tStatRecords">0</div>
             <div>Total Records</div>
           </div>
+          <div class="stat">
+            <div class="big" id="tStatAssignmentsAll">0</div>
+            <div>Assignments</div>
+          </div>
         </div>
         <!-- Admin extra stat row -->
         <div class="stats hide" style="margin-top:12px" id="adminExtraStats">
           <div class="stat">
             <div class="big" id="tStatTeachers">0</div>
             <div>Teachers</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="tStatAssignments">0</div>
+            <div>Assignments</div>
           </div>
         </div>
       </div>
@@ -192,15 +202,7 @@
           </div>
           <div class="field">
             <label>Class</label>
-            <select class="input" id="sClass">
-              <option value="">Select Class</option>
-              <option value="BBA">BBA</option>
-              <option value="BTECH">BTECH</option>
-              <option value="BCA">BCA</option>
-              <option value="BA">BA</option>
-              <option value="BCOM">BCOM</option>
-              <option value="BSC">BSC</option>
-            </select>
+            <input class="input" id="sClass" placeholder="e.g. CS-7A, BCA, BBA-3" />
           </div>
           <div class="field">
             <label>Email</label>
@@ -391,7 +393,7 @@
 
       <!-- PAYMENT MODAL -->
       <div id="paymentModal" class="modal-overlay hide">
-        <div class="card" style="max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
+        <div class="card pad" style="max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
           <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:20px">
             <h3 style="margin:0">Record Payment</h3>
             <button class="btn ghost" id="closePaymentModal">✕</button>
@@ -470,6 +472,183 @@
           <div class="row" style="margin-top:20px; justify-content:flex-end; gap:12px">
             <button class="btn" id="cancelPaymentBtn">Cancel</button>
             <button class="btn success" id="savePaymentBtn">Record Payment</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNMENTS (Teacher/Admin) -->
+      <div id="assignments" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">Assignments</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">Upload assignments with deadlines. Students submit before the due date.</p>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="createAssignmentBtn">+ New Assignment</button>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats" style="margin-top:14px; grid-template-columns: repeat(4, minmax(0,1fr))">
+          <div class="stat">
+            <div class="big" id="aStatTotal">0</div>
+            <div>Total</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="aStatActive">0</div>
+            <div>Active</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="aStatOverdue">0</div>
+            <div>Overdue</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="aStatSubmissions">0</div>
+            <div>Submissions</div>
+          </div>
+        </div>
+
+        <!-- Filter row -->
+        <div class="row" style="margin-top:14px">
+          <select class="input" id="assignmentClassFilter" style="max-width:200px">
+            <option value="">All Classes</option>
+          </select>
+          <select class="input" id="assignmentStatusFilter" style="max-width:180px">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="overdue">Overdue</option>
+            <option value="closed">Closed</option>
+          </select>
+          <input class="input" id="assignmentSearch" placeholder="Search by title or subject…" />
+        </div>
+
+        <!-- Assignment cards grid -->
+        <div id="assignmentCardsGrid" style="margin-top:16px; display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(340px,1fr))"></div>
+      </div>
+
+      <!-- CREATE / EDIT ASSIGNMENT MODAL -->
+      <div id="assignmentModal" class="modal-overlay hide">
+        <div class="card" style="max-width:620px; width:95%; max-height:92vh; overflow-y:auto; padding:28px">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h3 style="margin:0" id="assignmentModalTitle">New Assignment</h3>
+            <button class="btn ghost" id="closeAssignmentModal">✕</button>
+          </div>
+
+          <div class="grid cols-2" style="gap:14px">
+            <div class="field" style="grid-column:span 2">
+              <label>Assignment Title *</label>
+              <input class="input" id="aTitle" placeholder="e.g. Data Structures – Linked List Implementation" />
+            </div>
+            <div class="field">
+              <label>Subject *</label>
+              <input class="input" id="aSubject" placeholder="e.g. Computer Science" />
+            </div>
+            <div class="field">
+              <label>Target Class *</label>
+              <select class="input" id="aClass">
+                <option value="">Select Class</option>
+                <option value="All">All Classes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Deadline *</label>
+              <input class="input" id="aDeadline" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label>Max Marks</label>
+              <input class="input" id="aMaxMarks" type="number" placeholder="100" />
+            </div>
+            <div class="field" style="grid-column:span 2">
+              <label>Description / Instructions</label>
+              <textarea class="input" id="aDescription" rows="3" placeholder="Describe the assignment, marking criteria, etc."></textarea>
+            </div>
+
+            <!-- File upload area -->
+            <div class="field" style="grid-column:span 2">
+              <label>Attach Files (PDF, DOC, DOCX, PNG, JPG, ZIP — max 10 MB each)</label>
+              <div class="file-drop-zone" id="aFileDropZone">
+                <div class="file-drop-icon">📎</div>
+                <div class="file-drop-text">Drag & drop files here, or <span class="file-drop-link">browse</span></div>
+                <div class="file-drop-sub">Supports PDF, Word, Images, ZIP</div>
+                <input type="file" id="aFileInput" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.txt" style="display:none" />
+              </div>
+              <div id="aFileList" style="margin-top:10px; display:grid; gap:6px"></div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:20px; justify-content:flex-end; gap:12px">
+            <button class="btn" id="cancelAssignmentBtn">Cancel</button>
+            <button class="btn primary" id="saveAssignmentBtn">Publish Assignment</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNMENT DETAIL MODAL (teacher sees submissions) -->
+      <div id="assignmentDetailModal" class="modal-overlay hide">
+        <div class="card" style="max-width:800px; width:95%; max-height:92vh; overflow-y:auto; padding:28px">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:6px">
+            <h3 style="margin:0" id="detailTitle">Assignment Detail</h3>
+            <button class="btn ghost" id="closeDetailModal">✕</button>
+          </div>
+          <div id="detailMeta" style="color:var(--muted); font-size:.9rem; margin-bottom:16px"></div>
+          <div id="detailDescription" style="margin-bottom:16px; padding:14px; background:#f8fafc; border-radius:12px; line-height:1.7"></div>
+
+          <!-- Attached files by teacher -->
+          <div id="detailAttachments" style="margin-bottom:16px"></div>
+
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:10px">
+            <h4 style="margin:0">Student Submissions</h4>
+            <button class="btn small" id="exportSubmissionsBtn">Export CSV</button>
+          </div>
+
+          <div class="card" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Roll</th>
+                  <th>Class</th>
+                  <th>Submitted At</th>
+                  <th>Files</th>
+                  <th>Notes</th>
+                  <th>Marks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="submissionsTbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Students who haven't submitted -->
+          <div id="notSubmittedSection" style="margin-top:16px">
+            <h4 style="margin:0 0 8px 0; color:var(--danger)">Not Submitted</h4>
+            <div id="notSubmittedList" style="display:flex; flex-wrap:wrap; gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRADE MODAL -->
+      <div id="gradeModal" class="modal-overlay hide">
+        <div class="card" style="max-width:400px; width:90%; padding:24px">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:16px">
+            <h3 style="margin:0">Grade Submission</h3>
+            <button class="btn ghost" id="closeGradeModal">✕</button>
+          </div>
+          <div class="field">
+            <label>Student</label>
+            <input class="input" id="gradeStudentName" readonly />
+          </div>
+          <div class="field">
+            <label>Marks Awarded</label>
+            <input class="input" id="gradeMarks" type="number" placeholder="e.g. 85" />
+          </div>
+          <div class="field">
+            <label>Feedback (Optional)</label>
+            <textarea class="input" id="gradeFeedback" rows="3" placeholder="Write feedback for the student…"></textarea>
+          </div>
+          <div class="row" style="margin-top:16px; justify-content:flex-end; gap:10px">
+            <button class="btn" id="cancelGradeBtn">Cancel</button>
+            <button class="btn success" id="saveGradeBtn">Save Grade</button>
           </div>
         </div>
       </div>
@@ -679,6 +858,88 @@
           </div>
         </div>
       </div>
+
+      <!-- STUDENT ASSIGNMENTS -->
+      <div id="studentAssignments" class="card pad hide">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <div>
+            <h2 style="margin:0">My Assignments</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted)">View and submit your assignments before the deadline.</p>
+          </div>
+          <div class="row">
+            <select class="input" id="stuAssignmentFilter" style="max-width:180px">
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="submitted">Submitted</option>
+              <option value="graded">Graded</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats" style="margin-top:14px; grid-template-columns:repeat(4,minmax(0,1fr))">
+          <div class="stat">
+            <div class="big" id="stuAStatTotal">0</div>
+            <div>Total</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuAStatSubmitted">0</div>
+            <div>Submitted</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuAStatPending">0</div>
+            <div>Pending</div>
+          </div>
+          <div class="stat">
+            <div class="big" id="stuAStatGraded">0</div>
+            <div>Graded</div>
+          </div>
+        </div>
+
+        <div id="stuAssignmentCards" style="margin-top:16px; display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(340px,1fr))"></div>
+      </div>
+
+      <!-- STUDENT SUBMIT MODAL -->
+      <div id="submitAssignmentModal" class="modal-overlay hide">
+        <div class="card" style="max-width:560px; width:95%; max-height:92vh; overflow-y:auto; padding:28px">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:6px">
+            <h3 style="margin:0" id="submitModalTitle">Submit Assignment</h3>
+            <button class="btn ghost" id="closeSubmitModal">✕</button>
+          </div>
+          <div id="submitModalMeta" style="color:var(--muted); font-size:.9rem; margin-bottom:12px"></div>
+          <div id="submitModalDesc" style="padding:12px; background:#f8fafc; border-radius:10px; margin-bottom:16px; font-size:.95rem; line-height:1.7"></div>
+
+          <!-- Teacher attachments to download -->
+          <div id="submitModalAttachments" style="margin-bottom:16px"></div>
+
+          <!-- If already submitted, show that -->
+          <div id="alreadySubmittedBanner" class="hide" style="background:#d1fae5; color:#047857; padding:14px; border-radius:10px; margin-bottom:14px; font-size:.95rem">
+            ✅ You have already submitted this assignment.
+          </div>
+          <div id="gradeResultBanner" class="hide" style="background:#dbeafe; color:#1d4ed8; padding:14px; border-radius:10px; margin-bottom:14px; font-size:.95rem"></div>
+
+          <div id="submitForm">
+            <div class="field">
+              <label>Upload Your Submission (PDF, DOC, DOCX, PNG, JPG, ZIP)</label>
+              <div class="file-drop-zone" id="subFileDropZone">
+                <div class="file-drop-icon">📤</div>
+                <div class="file-drop-text">Drag & drop files here, or <span class="file-drop-link">browse</span></div>
+                <div class="file-drop-sub">Max 10 MB per file</div>
+                <input type="file" id="subFileInput" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.txt" style="display:none" />
+              </div>
+              <div id="subFileList" style="margin-top:10px; display:grid; gap:6px"></div>
+            </div>
+            <div class="field">
+              <label>Notes / Comments (Optional)</label>
+              <textarea class="input" id="subNotes" rows="2" placeholder="Any notes for your teacher…"></textarea>
+            </div>
+            <div class="row" style="margin-top:16px; justify-content:flex-end; gap:10px">
+              <button class="btn" id="cancelSubmitBtn">Cancel</button>
+              <button class="btn primary" id="saveSubmitBtn">Submit Assignment</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </section>
           
@@ -815,6 +1076,25 @@
       <div class="row" style="margin-top:20px; justify-content:flex-end; gap:12px">
         <button class="btn" id="cancelProcessingBtn">Cancel</button>
         <button class="btn success" id="confirmPaymentBtn">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE VIEWER MODAL -->
+  <div id="fileViewerModal" class="modal-overlay hide">
+    <div class="card" style="max-width:860px; width:96%; max-height:94vh; display:flex; flex-direction:column; overflow:hidden; padding:0">
+      <div class="row" style="justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0">
+        <div>
+          <div id="fileViewerName" style="font-weight:700; font-size:1rem"></div>
+          <div id="fileViewerSize" style="font-size:.82rem; color:var(--muted); margin-top:2px"></div>
+        </div>
+        <div class="row" style="gap:8px">
+          <a class="btn small primary" id="fileViewerDownload" download>⬇ Download</a>
+          <button class="btn ghost" id="closeFileViewer" style="font-size:1.2rem; line-height:1; padding:8px 12px">✕</button>
+        </div>
+      </div>
+      <div id="fileViewerBody" style="flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; background:#f1f5f9; min-height:300px; padding:20px">
+        <!-- content injected by JS -->
       </div>
     </div>
   </div>
